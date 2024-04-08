@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:qr_checkin/utils/theme_ext.dart';
 
 class AppSizes {
   static const int splashScreenTitleFontSize = 48;
