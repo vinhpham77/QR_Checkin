@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:qr_checkin/config/theme.dart';
 import 'package:qr_checkin/utils/theme_ext.dart';
 
 import '../../config/router.dart';
@@ -81,6 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
         child: loginWidget);
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SingleChildScrollViewWithColumn(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -88,10 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Text(
               'Đăng nhập',
-              style: context.text.headlineLarge!.copyWith(
-                fontWeight: FontWeight.bold,
-                color: context.color.onBackground,
-              ),
+              style: context.text.headlineLarge!,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -153,12 +152,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       required isFocused,
                       maxLength}) =>
                   null,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Tên đăng nhập',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.person),
+                prefixIcon: Icon(Icons.person),
                 filled: true,
               ),
               validator: (value) {
@@ -189,9 +185,6 @@ class _LoginScreenState extends State<LoginScreen> {
               autofillHints: const [AutofillHints.newPassword],
               decoration: InputDecoration(
                 labelText: 'Mật khẩu',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
                     icon: _passwordVisible
@@ -232,8 +225,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 context.read<AuthBloc>().add(AuthRegisterInitiated());
                 context.go(RouteName.register);
               },
-              child: const Text('Chưa có tài khoản? Đăng ký ngay!',
-                  textAlign: TextAlign.center),
+              child: Text('Chưa có tài khoản? Đăng ký ngay!',
+                  textAlign: TextAlign.center, style: context.text.bodyMedium!.copyWith(
+                    color: context.color.primary,
+                    fontWeight: FontWeight.w400,
+                  )),
             ),
           ]
               .animate(

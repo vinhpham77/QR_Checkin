@@ -2,8 +2,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/bloc/auth_bloc.dart';
+import '../screens/create_event/create_event_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/login/login_screen.dart';
+import '../screens/qr_scanner/qr_scanner.dart';
 import '../screens/register/register_screen.dart';
 
 class RouteName {
@@ -14,6 +16,8 @@ class RouteName {
   static const String register = '/register';
   static const String registrations = '/registrations';
   static const String favorites = '/favorites';
+  static const String scanner = '/scanner';
+  static const String eventCreate = '/event/create';
 
   static const publicRoutes = [
     login,
@@ -33,16 +37,16 @@ final router = GoRouter(
   },
   routes: [
     GoRoute(
-      path: RouteName.home,
-      builder: (context, state) => const HomeScreen(selectedIndex: 0),
-    ),
-    GoRoute(
       path: RouteName.login,
       builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
       path: RouteName.register,
       builder: (context, state) => const RegisterScreen(),
+    ),
+    GoRoute(
+      path: RouteName.home,
+      builder: (context, state) => const HomeScreen(selectedIndex: 0),
     ),
     GoRoute(
       path: RouteName.registrations,
@@ -56,5 +60,12 @@ final router = GoRouter(
       path: RouteName.profile,
       builder: (context, state) => const HomeScreen(selectedIndex: 3),
     ),
+    GoRoute(
+      path: RouteName.scanner,
+      builder: (context, state) => const QRScannerScreen(),
+    ),
+    GoRoute(
+        path: RouteName.eventCreate,
+        builder: (context, state) => const CreateEventScreen()),
   ],
 );

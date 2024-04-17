@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/config/theme.dart';
+import 'package:qr_checkin/screens/events/events_screen.dart';
 import 'package:qr_checkin/utils/theme_ext.dart';
+import 'package:qr_checkin/widgets/main_qr_button.dart';
 
 import '../../config/router.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
+import '../../widgets/event_create_button.dart';
 
 class HomeScreen extends StatefulWidget {
   final int selectedIndex;
@@ -17,6 +22,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late GoogleMapController mapController;
+  final Set<Marker> _markers = {};
+  LatLng? _currentPosition;
+  bool serviceEnabled = false;
   late int _selectedIndex;
   late final theme = Theme.of(context);
   final _pageController = PageController();
@@ -24,64 +33,106 @@ class _HomeScreenState extends State<HomeScreen> {
     _getItem(Icons.home_outlined, Icons.home, 'Trang chủ', theme),
     _getItem(Icons.event_seat_outlined, Icons.event_seat, 'Đã đăng ký', theme),
     BottomNavigationBarItem(icon: Container(), label: ''),
-    _getItem(Icons.favorite_outline, Icons.favorite, 'Favorites', theme),
-    _getItem(Icons.person_outline, Icons.person, 'Profile', theme)
+    _getItem(Icons.edit_document, Icons.favorite, 'Yêu thích', theme),
+    _getItem(Icons.person_outline, Icons.person, 'Hồ sơ', theme)
   ];
 
   @override
   void initState() {
     super.initState();
     _selectedIndex = widget.selectedIndex;
+    _getUserLocation();
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget widget = Scaffold(
-      body: PageView(
-        controller: _pageController,
-        padEnds: false,
-        onPageChanged: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        children: [
-          const Center(
-            child: Text('Home Screen'),
-          ),
-          const Center(
-            child: Text('Registrations Screen'),
-          ),
-          Center(
-            child: Container(),
-          ),
-          const Center(
-            child: Text('Favorites Screen'),
-          ),
-          const Center(
-            child: Text('Profile Screen'),
-          ),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.only(
-              topRight: Radius.circular(15), topLeft: Radius.circular(15)),
-          boxShadow: [
-            BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(15.0),
-            topRight: Radius.circular(15.0),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
+    Widget widget = Stack(
+      children: [
+        Scaffold(
+          body: PageView(
+            controller: _pageController,
+            padEnds: false,
+            physics: const NeverScrollableScrollPhysics(),
+            onPageChanged: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
             children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
+              const EventsScreen(),
+              const Center(
+                child: Text('Đã đăng ký'),
+              ),
+              Container(),
+              Center(
+                child: _currentPosition == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : GoogleMap(
+                        markers: _markers,
+                        onTap: (LatLng latLng) {
+                          mapController.animateCamera(
+                            CameraUpdate.newLatLng(latLng),
+                          );
+                          setState(() {
+                            _markers.clear();
+                            _markers.add(
+                              Marker(
+                                markerId: MarkerId(latLng.toString()),
+                                position: latLng,
+                                infoWindow: InfoWindow(
+                                  title: 'Địa điểm đã chọn',
+                                  snippet:
+                                      '(${latLng.latitude}, ${latLng.longitude})',
+                                ),
+                              ),
+                            );
+                          });
+                        },
+                        buildingsEnabled: true,
+                        mapToolbarEnabled: true,
+                        rotateGesturesEnabled: true,
+                        trafficEnabled: true,
+                        compassEnabled: true,
+                        indoorViewEnabled: true,
+                        tiltGesturesEnabled: true,
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
+                        zoomControlsEnabled: true,
+                        zoomGesturesEnabled: true,
+                        onMapCreated: _onMapCreated,
+                        initialCameraPosition: CameraPosition(
+                          target: _currentPosition!,
+                          zoom: 18,
+                        ),
+                      ),
+              ),
+              const Center(
+                child: Text('Profile Screen'),
+              ),
+            ],
+          ),
+          floatingActionButton: const EventCreateButton(),
+          bottomNavigationBar: Container(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(15), topLeft: Radius.circular(15)),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black38,
+                    spreadRadius: 0,
+                    blurRadius: 12,
+                    offset: Offset(0, 28)),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(15.0),
+                topRight: Radius.circular(15.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 4),
                 child: BottomNavigationBar(
+                  selectedItemColor: AppColors.black,
                   type: BottomNavigationBarType.fixed,
                   iconSize: 32.0,
                   currentIndex: _selectedIndex,
@@ -95,11 +146,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
               ),
-              _buildQRButton(theme),
-            ],
+            ),
           ),
         ),
-      ),
+        const Positioned(bottom: 8, left: 0, right: 0, child: MainQRButton())
+      ],
     );
 
     widget = BlocListener<AuthBloc, AuthState>(
@@ -138,10 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return BottomNavigationBarItem(
       label: title,
       tooltip: title,
-      activeIcon: Padding(
-        padding: const EdgeInsets.only(top: 2.0),
-        child: Icon(activeIconData),
-      ),
+      activeIcon: Icon(activeIconData),
       icon: Padding(
         padding: const EdgeInsets.only(top: 2.0),
         child: Icon(activeIconData),
@@ -149,30 +197,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildQRButton(ThemeData theme) {
-    return Transform.translate(
-      offset: const Offset(0, -4),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-        ),
-        child: InkWell(
-          child: Container(
-            padding: const EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.qr_code_scanner,
-              color: AppColors.backgroundLight,
-              size: 32,
-            ),
-          ),
-        ),
-      ),
-    );
+  void _getUserLocation() async {
+    LocationPermission permission = await Geolocator.requestPermission();
+
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    double lat = position.latitude;
+    double long = position.longitude;
+
+    LatLng location = LatLng(lat, long);
+
+    setState(() {
+      _currentPosition = location;
+    });
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
   }
 }

@@ -1,9 +1,12 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 
+const real = 'http://192.168.153.55:8888/api';
+const simulator = 'http://10.0.2.2:8888/api';
+
 final dio = Dio(
   BaseOptions(
-    baseUrl: 'http://10.0.2.2:8888/api',
+    baseUrl: real,
   ),
 );
 
@@ -21,21 +24,17 @@ Future<void> setDeviceInfo(Dio dio) async {
 }
 
 Future<String> getDeviceName() async {
-  String deviceName;
   try {
-    deviceName = (await DeviceInfoPlugin().androidInfo).device;
+    return (await DeviceInfoPlugin().androidInfo).model;
   } on Exception {
-    deviceName = 'Unknown';
+    return 'Unknown';
   }
-  return deviceName;
 }
 
 Future<String> getDeviceId() async {
-  String deviceId;
   try {
-    deviceId = (await DeviceInfoPlugin().androidInfo).id;
+    return (await DeviceInfoPlugin().androidInfo).id;
   } on Exception {
-    deviceId = 'Unknown';
+    return 'Unknown';
   }
-  return deviceId;
 }

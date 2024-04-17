@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/utils/theme_ext.dart';
 
 import '../../config/router.dart';
+import '../../config/theme.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
 import '../../widgets/single_child_scroll_view_with_column.dart';
 
@@ -88,6 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: SingleChildScrollViewWithColumn(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -95,10 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           children: [
             Text(
               'Đăng ký',
-              style: context.text.headlineLarge!.copyWith(
-                fontWeight: FontWeight.bold,
-                color: context.color.onBackground,
-              ),
+              style: context.text.headlineLarge!,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -159,12 +158,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 }
               },
               autofillHints: const [AutofillHints.username],
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Tên đăng nhập',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: const Icon(Icons.person),
+                prefixIcon: Icon(Icons.person),
                 filled: true,
               ),
               validator: (value) {
@@ -195,13 +191,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   _passwordFocusNode.requestFocus();
                 }
               },
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Email',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
                 filled: true,
-                prefixIcon: const Icon(Icons.email),
+                prefixIcon: Icon(Icons.email),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -238,9 +231,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               autofillHints: const [AutofillHints.newPassword],
               decoration: InputDecoration(
                 labelText: 'Mật khẩu',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
                     icon: _passwordVisible
@@ -287,9 +277,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               },
               decoration: InputDecoration(
                 labelText: 'Nhập lại mật khẩu',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
                 filled: true,
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
@@ -336,8 +323,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ));
                 context.go(RouteName.login);
               },
-              child: const Text('Đã có tài khoản? Quay lại đăng nhập',
-                  textAlign: TextAlign.center),
+              child: Text('Đã có tài khoản? Quay lại đăng nhập',
+                  textAlign: TextAlign.center, style: context.text.bodyMedium!.copyWith(
+                    color: context.color.primary,
+                    fontWeight: FontWeight.w400,
+                  )),
             ),
           ]
               .animate(
