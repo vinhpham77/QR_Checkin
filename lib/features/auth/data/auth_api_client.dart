@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:qr_checkin/config/http_client.dart';
 
+import '../dtos/jwts.dart';
 import '../dtos/login_dto.dart';
 import '../dtos/login_success_dto.dart';
 import '../dtos/register_dto.dart';
@@ -12,12 +13,16 @@ class AuthApiClient {
 
   Future<LoginSuccessDto> login(LoginDto loginDto) async {
     try {
-      await setDeviceInfo(dio);
+      dio.options.headers['device-id'] = await getDeviceId();
+      dio.options.headers['device-name'] = await getDeviceName();
 
+      var interceptors = [...dio.interceptors];
+      dio.interceptors.clear();
       final response = await dio.post(
-        '/auth/login',
+        '${servicePaths['auth']}/login',
         data: loginDto.toJson(),
       );
+      dio.interceptors.addAll(interceptors);
 
       return LoginSuccessDto.fromJson(response.data);
     } on DioException catch (e) {
@@ -33,10 +38,8 @@ class AuthApiClient {
 
   Future<void> register(RegisterDto registerDto) async {
     try {
-      setDeviceInfo(dio);
-
       await dio.post(
-        '/auth/register',
+        '${servicePaths['auth']}/register',
         data: registerDto.toJson(),
       );
     } on DioException catch (e) {
@@ -52,12 +55,29 @@ class AuthApiClient {
 
   Future<void> logout(String refreshToken) async {
     try {
-      setDeviceInfo(dio);
-
       await dio.post(
-        '/auth/logout?apply=all',
+        '${servicePaths['auth']}/logout',
         data: refreshToken,
       );
+    } on DioException catch (e) {
+      if (e.response != null) {
+        throw Exception(e.response!.data['message']);
+      } else {
+        throw Exception(e.message);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<JWTs> refreshToken(String refreshToken) async {
+    try {
+      final response = await dio.post(
+        '${servicePaths['auth']}/refresh-token',
+        data: refreshToken,
+      );
+
+      return JWTs.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(e.response!.data['message']);

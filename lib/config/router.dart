@@ -17,7 +17,7 @@ class RouteName {
   static const String registrations = '/registrations';
   static const String favorites = '/favorites';
   static const String scanner = '/scanner';
-  static const String eventCreate = '/event/create';
+  static const String eventCreate = '/category/create';
 
   static const publicRoutes = [
     login,

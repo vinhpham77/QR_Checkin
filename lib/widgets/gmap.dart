@@ -8,8 +8,10 @@ import '../config/theme.dart';
 
 class GMap extends StatefulWidget {
   final double radius;
+  final Function onLocationChanged;
+  final LatLng? latLng;
 
-  const GMap({super.key, required this.radius});
+  const GMap({super.key, required this.radius, required this.onLocationChanged, this.latLng});
 
   @override
   State<GMap> createState() => _GMapState();
@@ -21,7 +23,6 @@ class _GMapState extends State<GMap> {
   final Set<Circle> _circles = {};
   late GoogleMapController mapController;
 
-  @override
   @override
   void initState() {
     super.initState();
@@ -69,6 +70,8 @@ class _GMapState extends State<GMap> {
                       strokeWidth: 1,
                     ),
                   );
+
+                  widget.onLocationChanged(latLng);
                 });
               },
               circles: _circles,

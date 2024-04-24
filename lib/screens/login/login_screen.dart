@@ -6,8 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/config/theme.dart';
 import 'package:qr_checkin/utils/theme_ext.dart';
 
+import '../../config/http_client.dart';
 import '../../config/router.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
+import '../../features/auth/data/auth_repository.dart';
 import '../../widgets/single_child_scroll_view_with_column.dart';
 
 class LoginScreen extends StatefulWidget {

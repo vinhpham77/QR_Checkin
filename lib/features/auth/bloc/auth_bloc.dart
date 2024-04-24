@@ -7,6 +7,8 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
+  final AuthRepository authRepository;
+
   AuthBloc(this.authRepository) : super(AuthInitial()) {
     on<AuthStarted>(_onStarted);
     on<AuthLoginStarted>(_onLoginStarted);
@@ -16,8 +18,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthAuthenticateStarted>(_onAuthenticateStarted);
     on<AuthLogoutStarted>(_onAuthLogoutStarted);
   }
-
-  final AuthRepository authRepository;
 
   void _onStarted(AuthStarted event, Emitter<AuthState> emit) async {
     emit(AuthAuthenticateUnauthenticated());
@@ -56,17 +56,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void _onAuthenticateStarted(
       AuthAuthenticateStarted event, Emitter<AuthState> emit) async {
-    final result = await authRepository.getToken();
+    final result = await authRepository.getAccessToken();
 
-    if (result is Success) {
-
-    } else {
+    if (result is Failure) {
       emit(AuthAuthenticateUnauthenticated());
     }
+
     return (switch (result) {
-      Success(data: final token) when token != null =>
-        emit(AuthAuthenticateSuccess(token)),
-      Success() => emit(AuthAuthenticateUnauthenticated()),
+      Success() => emit(AuthAuthenticateSuccess(result.data)),
       Failure() => emit(AuthAuthenticateFailure(result.message)),
     });
   }

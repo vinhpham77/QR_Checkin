@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-class Avatar extends StatelessWidget {
+class CustomImage extends StatelessWidget {
   final String? imageUrl;
   final double size;
   final IconData fallBackIcon;
 
-  const Avatar({
+  const CustomImage({
     super.key,
     this.imageUrl,
     required this.size,
@@ -22,12 +22,10 @@ class Avatar extends StatelessWidget {
         if (loadingProgress == null) {
           return child;
         }
-        return Icon(fallBackIcon,
-            size: size, color: Colors.black54);
+        return Icon(fallBackIcon, size: size, color: Colors.black54);
       },
       errorBuilder: (context, error, stackTrace) {
-        return Icon(fallBackIcon,
-            size: size, color: Colors.black54);
+        return Icon(fallBackIcon, size: size, color: Colors.black54);
       },
     );
   }

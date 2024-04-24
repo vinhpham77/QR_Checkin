@@ -183,15 +183,11 @@ final themeData = ThemeData(
   ),
   switchTheme: SwitchThemeData(
     thumbColor: MaterialStateProperty.resolveWith((states) {
-      if (states.contains(MaterialState.selected)) {
-        return AppColors.red;
-      }
-
       return AppColors.white;
     }),
     trackColor: MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.selected)) {
-        return AppColors.pink.withOpacity(0.5);
+        return AppColors.red.withOpacity(0.5);
       }
       return AppColors.lightGray;
     }),

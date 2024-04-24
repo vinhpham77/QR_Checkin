@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import '../../result_type.dart';
@@ -54,9 +55,13 @@ class AuthRepository {
     return Success(null);
   }
 
-  Future<Result<String?>> getToken() async {
+  Future<Result<String>> getAccessToken() async {
     try {
       final token = await authLocalDataSource.getToken(AuthDataConstants.accessToken);
+
+      if (token == null) {
+        return Failure('No access token found');
+      }
 
       return Success(token);
     } on Exception catch (e) {
@@ -64,6 +69,47 @@ class AuthRepository {
       return Failure.fromException(e);
     }
   }
+
+  Future<Result<String?>> getRefreshToken() async {
+    try {
+      final token = await authLocalDataSource.getToken(AuthDataConstants.refreshToken);
+
+      if (token == null) {
+        return Failure('No refresh token found');
+      }
+
+      return Success(token);
+    } on Exception catch (e) {
+      log('$e');
+      return Failure.fromException(e);
+    }
+  }
+
+  Future<Result<void>> refreshToken() async {
+    try {
+      final result = await getRefreshToken();
+
+      if (result is Failure) {
+        return Failure('No refresh token found');
+      } else {
+        final refreshToken = (result as Success).data;
+        final loginSuccessDto = await authApiClient.refreshToken(refreshToken!);
+
+        await Future.wait([
+          authLocalDataSource.saveToken(
+              AuthDataConstants.accessToken, loginSuccessDto.accessToken),
+          authLocalDataSource.saveToken(
+              AuthDataConstants.refreshToken, loginSuccessDto.refreshToken),
+        ]);
+      }
+
+      return Success(null);
+    } on Exception catch (e) {
+      log('$e');
+      return Failure.fromException(e);
+    }
+  }
+
   // TODO: Implement logout
   Future<Result<void>> logout() async {
     try {

@@ -1,27 +1,26 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:qr_checkin/config/router.dart';
 
-const real = 'http://192.168.153.55:8888/api';
+import '../features/auth/data/auth_repository.dart';
+import '../features/result_type.dart';
+
+const real = 'http://192.168.1.10:8888/api';
 const simulator = 'http://10.0.2.2:8888/api';
 
 final dio = Dio(
   BaseOptions(
-    baseUrl: real,
+    baseUrl: simulator,
   ),
 );
 
-Future<void> setDeviceInfo(Dio dio) async {
-  String deviceName = await getDeviceName();
-  String deviceId = await getDeviceId();
-
-  dio.interceptors.add(InterceptorsWrapper(
-    onRequest: (options, handler) {
-      options.headers['device-id'] = deviceId;
-      options.headers['device-name'] = deviceName;
-      return handler.next(options);
-    },
-  ));
-}
+final servicePaths = {
+  'auth': '/auth',
+  'events': '/events',
+  'categories': '/categories',
+  'images': '/images',
+  'users': '/users',
+};
 
 Future<String> getDeviceName() async {
   try {
@@ -37,4 +36,71 @@ Future<String> getDeviceId() async {
   } on Exception {
     return 'Unknown';
   }
+}
+
+void addAccessTokenInterceptor(Dio dio, AuthRepository authRepository) async {
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        final result = await authRepository.getAccessToken();
+        String deviceId = await getDeviceId();
+        String deviceName = await getDeviceName();
+
+        options.headers['device-id'] = deviceId;
+        options.headers['device-name'] = deviceName;
+
+        if (result is Success) {
+          result as Success<String>;
+          options.headers['Authorization'] = 'Bearer ${result.data}';
+          return handler.next(options);
+        } else {
+          router.push('/login');
+        }
+      },
+      onError: (DioException error, ErrorInterceptorHandler handler) async {
+        String deviceId = await getDeviceId();
+        String deviceName = await getDeviceName();
+
+        dio.options.headers['device-id'] = deviceId;
+        dio.options.headers['device-name'] = deviceName;
+        if (error.response?.statusCode == 412) {
+          final result = await authRepository.refreshToken();
+          if (result is Success) {
+            final accessToken = await authRepository.getAccessToken();
+            dio.options.headers['Authorization'] = 'Bearer $accessToken';
+            return handler.resolve(
+              await dio.request(
+                error.requestOptions.path,
+                options: convertToOptions(error.requestOptions),
+              ),
+            );
+          } else {
+            router.push('/login');
+          }
+        } if (error.response?.statusCode == 406) {
+          router.push('/login');
+        }
+
+        return handler.next(error);
+      },
+    ),
+  );
+}
+
+Options convertToOptions(RequestOptions requestOptions) {
+  return Options(
+    method: requestOptions.method,
+    headers: requestOptions.headers,
+    responseType: requestOptions.responseType,
+    contentType: requestOptions.contentType,
+    validateStatus: requestOptions.validateStatus,
+    receiveTimeout: requestOptions.receiveTimeout,
+    sendTimeout: requestOptions.sendTimeout,
+    extra: requestOptions.extra,
+    followRedirects: requestOptions.followRedirects,
+    maxRedirects: requestOptions.maxRedirects,
+    requestEncoder: requestOptions.requestEncoder,
+    responseDecoder: requestOptions.responseDecoder,
+    listFormat: requestOptions.listFormat,
+  );
 }
