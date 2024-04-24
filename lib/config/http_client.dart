@@ -58,6 +58,7 @@ void addAccessTokenInterceptor(Dio dio, AuthRepository authRepository) async {
         }
       },
       onError: (DioException error, ErrorInterceptorHandler handler) async {
+        // FIXME: not retry on expired access token
         String deviceId = await getDeviceId();
         String deviceName = await getDeviceName();
 

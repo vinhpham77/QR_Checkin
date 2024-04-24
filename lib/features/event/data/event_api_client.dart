@@ -11,6 +11,8 @@ class EventApiClient {
 
   Future<EventDto> createEvent(EventDto event) async {
     try {
+      // FIXME: latitude and longitude are 0.0
+      // TODO: background test
       final response = await dio.post('/events', data: event.toJson());
       return EventDto.fromJson(response.data);
     } on DioException catch (e) {
