@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -23,6 +25,10 @@ class SecondScreenState extends State<SecondScreen> {
   late DateTime _startTime;
   late DateTime _endTime;
   late LatLng _latLng;
+  final _locationKey = GlobalKey<FormFieldState>();
+  final _locationFocusNode = FocusNode();
+  final _radiusKey = GlobalKey<FormFieldState>();
+  final _radiusFocusNode = FocusNode();
 
   String get location => _locationController.text;
   DateTime get startAt => _startTime;
@@ -39,6 +45,18 @@ class SecondScreenState extends State<SecondScreen> {
     _startTime = widget.event.startAt;
     _endTime = widget.event.endAt;
     _latLng = LatLng(widget.event.latitude, widget.event.longitude);
+
+    _locationFocusNode.addListener(() {
+      if (!_locationFocusNode.hasFocus) {
+        _locationKey.currentState?.validate();
+      }
+    });
+
+    _radiusFocusNode.addListener(() {
+      if (!_radiusFocusNode.hasFocus) {
+        _radiusKey.currentState?.validate();
+      }
+    });
   }
 
   @override
@@ -58,6 +76,10 @@ class SecondScreenState extends State<SecondScreen> {
               onDateTimeChanged: (dateTime) {
                 setState(() {
                   _startTime = dateTime;
+
+                  if (_endTime.isBefore(_startTime)) {
+                    _endTime = _startTime.add(const Duration(hours: 2));
+                  }
                 });
               },
               firstDate: DateTime.now(),
@@ -75,6 +97,11 @@ class SecondScreenState extends State<SecondScreen> {
               onDateTimeChanged: (dateTime) {
                 setState(() {
                   _endTime = dateTime;
+
+                  if (_endTime.isBefore(_startTime)) {
+                    log('ok');
+                    _startTime = _endTime.subtract(const Duration(hours: 2));
+                  }
                 });
               },
               firstDate: _startTime,
@@ -86,11 +113,15 @@ class SecondScreenState extends State<SecondScreen> {
           height: 8,
         ),
         TextFormField(
+          key: _locationKey,
+          focusNode: _locationFocusNode,
           decoration: const InputDecoration(filled: true),
           onEditingComplete: () {
-            FocusScope.of(context).nextFocus();
+            _locationKey.currentState?.validate();
+            _locationFocusNode.unfocus();
           },
           controller: _locationController,
+          autofillHints: const [AutofillHints.addressCityAndState],
           maxLength: 255,
           buildCounter: (context,
                   {required currentLength, required isFocused, maxLength}) =>
@@ -109,6 +140,8 @@ class SecondScreenState extends State<SecondScreen> {
           height: 8,
         ),
         TextFormField(
+          key: _radiusKey,
+          focusNode: _radiusFocusNode,
           controller: _radiusController,
           decoration: const InputDecoration(filled: true),
           keyboardType: TextInputType.number,
@@ -150,11 +183,21 @@ class SecondScreenState extends State<SecondScreen> {
               latLng: _latLng,
               onLocationChanged: (latLng) {
                 setState(() {
-                  latLng = latLng;
+                  log('latLng: $latLng');
+                  _latLng = latLng;
                 });
               },
             )),
       ]),
     );
+  }
+
+  @override
+  void dispose() {
+    _locationController.dispose();
+    _radiusController.dispose();
+    _locationFocusNode.dispose();
+    _radiusFocusNode.dispose();
+    super.dispose();
   }
 }

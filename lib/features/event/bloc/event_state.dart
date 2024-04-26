@@ -38,3 +38,43 @@ final class EventCreateFailure extends EventState {
   @override
   List<Object?> get props => [message];
 }
+
+final class EventFetchOneLoading extends EventState {}
+
+final class EventFetchOneSuccess extends EventState {
+  final EventDto event;
+
+  const EventFetchOneSuccess({required this.event});
+
+  @override
+  List<Object?> get props => [event];
+}
+
+final class EventFetchOneFailure extends EventState {
+  final String message;
+
+  const EventFetchOneFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+final class EventUpdating extends EventState {}
+
+final class EventUpdateSuccess extends EventState {
+  final EventDto event;
+
+  const EventUpdateSuccess({required this.event});
+
+  @override
+  List<Object?> get props => [event];
+}
+
+final class EventUpdateFailure extends EventState {
+  final String message;
+
+  const EventUpdateFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}

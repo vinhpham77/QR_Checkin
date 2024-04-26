@@ -27,6 +27,46 @@ class _GMapState extends State<GMap> {
   void initState() {
     super.initState();
     _getUserLocation();
+
+    if (widget.latLng != null) {
+      _markers.add(
+        Marker(
+          markerId: MarkerId(widget.latLng.toString()),
+          position: widget.latLng!,
+          infoWindow: InfoWindow.noText,
+        ),
+      );
+
+      _circles.add(
+        Circle(
+          circleId: CircleId(widget.latLng.toString()),
+          center: widget.latLng!,
+          radius: widget.radius,
+          fillColor: Colors.blue.withOpacity(0.3),
+          strokeColor: Colors.blue,
+          strokeWidth: 1,
+        ),
+      );
+    } else {
+      _markers.add(
+        Marker(
+          markerId: const MarkerId('current'),
+          position: _currentPosition!,
+          infoWindow: InfoWindow.noText,
+        ),
+      );
+
+      _circles.add(
+        Circle(
+          circleId: const CircleId('current'),
+          center: _currentPosition!,
+          radius: widget.radius,
+          fillColor: Colors.blue.withOpacity(0.3),
+          strokeColor: Colors.blue,
+          strokeWidth: 1,
+        ),
+      );
+    }
   }
 
   @override
@@ -52,10 +92,7 @@ class _GMapState extends State<GMap> {
                     Marker(
                       markerId: MarkerId(latLng.toString()),
                       position: latLng,
-                      infoWindow: InfoWindow(
-                        title: 'Toạ độ',
-                        snippet: '(${latLng.latitude}, ${latLng.longitude})',
-                      ),
+                      infoWindow: InfoWindow.noText
                     ),
                   );
 
@@ -64,7 +101,7 @@ class _GMapState extends State<GMap> {
                     Circle(
                       circleId: CircleId(latLng.toString()),
                       center: latLng,
-                      radius: widget.radius, // radius in meters
+                      radius: widget.radius,
                       fillColor: Colors.blue.withOpacity(0.3),
                       strokeColor: Colors.blue,
                       strokeWidth: 1,
@@ -72,6 +109,9 @@ class _GMapState extends State<GMap> {
                   );
 
                   widget.onLocationChanged(latLng);
+                  setState(() {
+                    _currentPosition = latLng;
+                  });
                 });
               },
               circles: _circles,
@@ -85,7 +125,7 @@ class _GMapState extends State<GMap> {
               zoomGesturesEnabled: true,
               onMapCreated: _onMapCreated,
               initialCameraPosition: CameraPosition(
-                target: _currentPosition!,
+                target: widget.latLng ?? _currentPosition!,
                 zoom: 18,
               ),
             ),
@@ -119,6 +159,5 @@ class _GMapState extends State<GMap> {
   void dispose() {
     super.dispose();
     mapController.dispose();
-
   }
 }

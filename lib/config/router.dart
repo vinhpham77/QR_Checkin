@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/bloc/auth_bloc.dart';
-import '../screens/create_event/create_event_screen.dart';
+import '../screens/cu_event/cu_event_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/login/login_screen.dart';
 import '../screens/qr_scanner/qr_scanner.dart';
@@ -11,13 +11,13 @@ import '../screens/register/register_screen.dart';
 class RouteName {
   static const String home = '/';
   static const String login = '/login';
-  static const String postDetail = '/post/:id';
   static const String profile = '/profile';
   static const String register = '/register';
   static const String registrations = '/registrations';
   static const String favorites = '/favorites';
   static const String scanner = '/scanner';
-  static const String eventCreate = '/category/create';
+  static const String eventCreate = '/event/create';
+  static const String eventUpdate = '/event/:id/update';
 
   static const publicRoutes = [
     login,
@@ -66,6 +66,12 @@ final router = GoRouter(
     ),
     GoRoute(
         path: RouteName.eventCreate,
-        builder: (context, state) => const CreateEventScreen()),
+        builder: (context, state) => const CuEventScreen()),
+    GoRoute(
+        path: RouteName.eventUpdate,
+        builder: (context, state) {
+          int id = state.extra as int;
+          return CuEventScreen(id: id);
+        }),
   ],
 );

@@ -4,10 +4,11 @@ import 'package:quill_html_editor/quill_html_editor.dart';
 import '../config/theme.dart';
 
 class Editor extends StatefulWidget {
+  final String text;
   final String hintText;
   final QuillEditorController controller;
 
-  const Editor({super.key, required this.hintText, required this.controller});
+  const Editor({super.key, this.text = '', this.hintText = '', required this.controller});
 
   @override
   State<Editor> createState() => _EditorState();
@@ -55,7 +56,7 @@ class _EditorState extends State<Editor> {
                           hasFocused = focus;
                         });
                       },
-                      text: '',
+                      text: widget.text,
                       hintText: widget.hintText,
                       controller: widget.controller,
                       minHeight: 200,

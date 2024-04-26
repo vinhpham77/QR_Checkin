@@ -12,8 +12,9 @@ class EventDto {
   double latitude;
   double longitude;
   double radius;
-  bool isRequired;
-  bool isApproved;
+  bool regisRequired;
+  bool approvalRequired;
+  bool captureRequired;
   List<CategoryDto> categories;
   String checkinQrCode;
   String? checkoutQrCode;
@@ -36,8 +37,9 @@ class EventDto {
     required this.latitude,
     required this.longitude,
     this.radius = 20,
-    this.isRequired = false,
-    this.isApproved = false,
+    this.regisRequired = false,
+    this.approvalRequired = false,
+    this.captureRequired = false,
     required this.checkinQrCode,
     this.checkoutQrCode,
     this.categories = const [],
@@ -62,8 +64,9 @@ class EventDto {
       latitude: json['latitude'],
       longitude: json['longitude'],
       radius: json['radius'],
-      isRequired: json['isRequired'],
-      isApproved: json['isApproved'],
+      regisRequired: json['regisRequired'],
+      approvalRequired: json['approvalRequired'],
+      captureRequired: json['captureRequired'],
       categories: (json['categories'] as List).map((e) => CategoryDto.fromJson(e)).toList(),
       checkinQrCode: json['checkinQrCode'],
       checkoutQrCode: json['checkoutQrCode'],
@@ -108,8 +111,9 @@ class EventDto {
       'latitude': latitude.toString(),
       'longitude': longitude.toString(),
       'radius': radius,
-      'isRequired': isRequired,
-      'isApproved': isApproved,
+      'regisRequired': regisRequired,
+      'approvalRequired': approvalRequired,
+      'captureRequired': captureRequired,
       'categories': categories.map((e) => e.toJson()).toList(),
       'checkoutQrCode': checkoutQrCode,
       'createdAt': createdAt.toIso8601String(),
@@ -133,8 +137,9 @@ class EventDto {
     double? latitude,
     double? longitude,
     double? radius,
-    bool? isRequired,
-    bool? isApproved,
+    bool? regisRequired,
+    bool? approvalRequired,
+    bool? captureRequired,
     List<CategoryDto>? categories,
     String? checkinQrCode,
     String? checkoutQrCode,
@@ -157,8 +162,9 @@ class EventDto {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       radius: radius ?? this.radius,
-      isRequired: isRequired ?? this.isRequired,
-      isApproved: isApproved ?? this.isApproved,
+      regisRequired: regisRequired ?? this.regisRequired,
+      approvalRequired: approvalRequired ?? this.approvalRequired,
+      captureRequired: captureRequired ?? this.captureRequired,
       categories: categories ?? this.categories,
       checkinQrCode: checkinQrCode ?? this.checkinQrCode,
       checkoutQrCode: checkoutQrCode ?? this.checkoutQrCode,

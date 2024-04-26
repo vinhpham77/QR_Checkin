@@ -16,21 +16,25 @@ class ThirdScreen extends StatefulWidget {
 
 class ThirdScreenState extends State<ThirdScreen> {
 
-  late bool isRequired;
-  late bool isApproved;
+  late bool regisRequired;
+  late bool approvalRequired;
+  late bool captureRequired;
   late String checkinQrCode;
   late String? checkoutQrCode;
   late int? slots;
+  late final TextEditingController _slotsController;
 
   @override
   void initState() {
     super.initState();
 
-    isRequired = widget.event.isRequired;
-    isApproved = widget.event.isApproved;
+    regisRequired = widget.event.regisRequired;
+    approvalRequired = widget.event.approvalRequired;
+    captureRequired = widget.event.captureRequired;
     checkinQrCode = widget.event.checkinQrCode;
     checkoutQrCode = widget.event.checkoutQrCode;
     slots = widget.event.slots;
+    _slotsController = TextEditingController(text: slots?.toString());
   }
 
   @override
@@ -56,13 +60,13 @@ class ThirdScreenState extends State<ThirdScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Yêu cầu đăng ký trước', style: themeData.textTheme.bodyMedium!),
+            Text('Yêu cầu chụp ảnh xác minh', style: themeData.textTheme.bodyMedium!),
             // Switch
             Switch(
-              value: isRequired,
+              value: captureRequired,
               onChanged: (value) {
                 setState(() {
-                  isRequired = value;
+                  captureRequired = value;
                 });
               },
             ),
@@ -71,13 +75,28 @@ class ThirdScreenState extends State<ThirdScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Phê duyệt yêu cầu', style: themeData.textTheme.bodyMedium!),
+            Text('Yêu cầu đăng ký trước', style: themeData.textTheme.bodyMedium!),
             // Switch
             Switch(
-              value: isApproved,
+              value: regisRequired,
               onChanged: (value) {
                 setState(() {
-                  isApproved = value;
+                  regisRequired = value;
+                });
+              },
+            ),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Phê duyệt lượt đăng ký', style: themeData.textTheme.bodyMedium!),
+            // Switch
+            Switch(
+              value: approvalRequired,
+              onChanged: (value) {
+                setState(() {
+                  approvalRequired = value;
                 });
               },
             ),
@@ -89,6 +108,7 @@ class ThirdScreenState extends State<ThirdScreen> {
           height: 8,
         ),
         TextFormField(
+          controller: _slotsController,
           decoration: const InputDecoration(
               filled: true, hintText: 'Để trống nếu không giới hạn số lượng'),
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -97,7 +117,11 @@ class ThirdScreenState extends State<ThirdScreen> {
             FocusScope.of(context).nextFocus();
           },
           validator: (value) {
-            int? number = int.tryParse(value ?? '0');
+            if (value == null || value.trim().isEmpty) {
+              return null;
+            }
+
+            int? number = int.tryParse(value);
             if (number! < 0) {
               return 'Số lượng phải lớn hơn 0';
             }
@@ -108,5 +132,11 @@ class ThirdScreenState extends State<ThirdScreen> {
         ),
       ]),
     );
+  }
+
+  @override
+  void dispose() {
+    _slotsController.dispose();
+    super.dispose();
   }
 }

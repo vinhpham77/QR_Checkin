@@ -14,17 +14,37 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   EventRepository eventRepository;
 
   EventBloc(this.eventRepository) : super(EventInitial()) {
-    on<EventCreatePrefilled>(_prefillEvent);
-    on<EventCreateStarted>(_createEvent);
+    on<EventPrefilled>(_prefillEvent);
+    on<EventCreate>(_createEvent);
+    on<EventFetchOne>(_fetchOneEvent);
+    on<EventUpdate>(_updateEvent);
   }
 
-  void _prefillEvent(EventCreatePrefilled event, Emitter<EventState> emit) {
+  void _prefillEvent(EventPrefilled event, Emitter<EventState> emit) {
     emit(EventCreateInitial(event: event.event));
   }
 
-  void _createEvent(EventCreateStarted event, Emitter<EventState> emit) async {
+  void _fetchOneEvent(EventFetchOne event, Emitter<EventState> emit) async {
+    emit(EventFetchOneLoading());
+    Result result = await eventRepository.get(event.id);
+    return (switch (result) {
+      Success() => emit(EventFetchOneSuccess(event: result.data)),
+      Failure() => emit(EventFetchOneFailure(message: result.message)),
+    });
+  }
+
+  void _createEvent(EventCreate event, Emitter<EventState> emit) async {
     emit(EventCreating());
     Result result = await eventRepository.createEvent(event.event);
+    return (switch (result) {
+      Success() => emit(EventCreated(event: result.data)),
+      Failure() => emit(EventCreateFailure(message: result.message)),
+    });
+  }
+
+  void _updateEvent(EventUpdate event, Emitter<EventState> emit) async {
+    emit(EventCreating());
+    Result result = await eventRepository.updateEvent(event.eventId, event.event);
     return (switch (result) {
       Success() => emit(EventCreated(event: result.data)),
       Failure() => emit(EventCreateFailure(message: result.message)),

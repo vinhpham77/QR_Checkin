@@ -58,12 +58,6 @@ void addAccessTokenInterceptor(Dio dio, AuthRepository authRepository) async {
         }
       },
       onError: (DioException error, ErrorInterceptorHandler handler) async {
-        // FIXME: not retry on expired access token
-        String deviceId = await getDeviceId();
-        String deviceName = await getDeviceName();
-
-        dio.options.headers['device-id'] = deviceId;
-        dio.options.headers['device-name'] = deviceName;
         if (error.response?.statusCode == 412) {
           final result = await authRepository.refreshToken();
           if (result is Success) {
@@ -72,6 +66,11 @@ void addAccessTokenInterceptor(Dio dio, AuthRepository authRepository) async {
             return handler.resolve(
               await dio.request(
                 error.requestOptions.path,
+                data: error.requestOptions.data,
+                queryParameters: error.requestOptions.queryParameters,
+                onSendProgress: error.requestOptions.onSendProgress,
+                onReceiveProgress: error.requestOptions.onReceiveProgress,
+                cancelToken: error.requestOptions.cancelToken,
                 options: convertToOptions(error.requestOptions),
               ),
             );
@@ -91,6 +90,9 @@ void addAccessTokenInterceptor(Dio dio, AuthRepository authRepository) async {
 Options convertToOptions(RequestOptions requestOptions) {
   return Options(
     method: requestOptions.method,
+    persistentConnection: requestOptions.persistentConnection,
+    preserveHeaderCase: requestOptions.preserveHeaderCase,
+    receiveDataWhenStatusError: requestOptions.receiveDataWhenStatusError,
     headers: requestOptions.headers,
     responseType: requestOptions.responseType,
     contentType: requestOptions.contentType,

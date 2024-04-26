@@ -30,11 +30,10 @@ class _DateTimePickerState extends State<DateTimePicker> {
 
   @override
   Widget build(BuildContext context) {
-    log('initialDate: ${widget.initialDate}');
-
     return TextFormField(
       onTap: () => _openDatePicker(context),
       controller: _controller,
+      readOnly: true,
       decoration: InputDecoration(
         filled: true,
         suffixIcon: IconButton(

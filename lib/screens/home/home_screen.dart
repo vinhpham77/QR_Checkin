@@ -106,8 +106,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
               ),
-              const Center(
-                child: Text('Profile Screen'),
+              Center(
+                child: IconButton(
+                  icon: const Icon(Icons.upload),
+                  onPressed: () => router.push(RouteName.eventUpdate, extra: 1),
+                )
               ),
             ],
           ),

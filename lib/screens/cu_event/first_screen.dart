@@ -40,6 +40,8 @@ class FirstScreenState extends State<FirstScreen> {
   late List<CategoryDto> _categories = [];
   late CategoryBloc _categoryBloc;
   late ImageBloc _imageBloc;
+  final _nameKey = GlobalKey<FormFieldState>();
+  final _nameFocusNode = FocusNode();
 
   String get name => _nameController.text;
   Future<String> get description => _descriptionController.getText();
@@ -50,9 +52,14 @@ class FirstScreenState extends State<FirstScreen> {
     id = widget.event.id;
     _nameController = TextEditingController(text: widget.event.name);
     _descriptionController = QuillEditorController();
-    setHtmlText(widget.event.description);
     selectedCategories = [...widget.event.categories];
     backgroundUrl = widget.event.backgroundUrl;
+
+    _nameFocusNode.addListener(() {
+      if (!_nameFocusNode.hasFocus) {
+        _nameKey.currentState!.validate();
+      }
+    });
 
     _categoryBloc = CategoryBloc(CategoryRepository(CategoryApiClient(dio)));
     _imageBloc = ImageBloc(ImageRepository(ImageApiClient(dio)));
@@ -117,18 +124,19 @@ class FirstScreenState extends State<FirstScreen> {
             height: 8,
           ),
           TextFormField(
+            key: _nameKey,
             decoration: const InputDecoration(filled: true),
-            onEditingComplete: () {
-              FocusScope.of(context).unfocus();
-              _descriptionController.requestFocus();
+            onTapOutside: (event) {
+              _nameFocusNode.unfocus();
             },
             controller: _nameController,
+            focusNode: _nameFocusNode,
             maxLength: 100,
             buildCounter: (context,
                     {required currentLength, required isFocused, maxLength}) =>
                 null,
             validator: (value) {
-              if (value == null || value.trim().isEmpty) {
+              if (value!.trim().isEmpty) {
                 return 'Vui lòng nhập tên sự kiện';
               }
 
@@ -214,7 +222,10 @@ class FirstScreenState extends State<FirstScreen> {
           ),
           SizedBox(
             height: 400,
-            child: Editor(hintText: '', controller: _descriptionController),
+            child: Editor(
+                text: widget.event.description ?? '',
+                hintText: '',
+                controller: _descriptionController),
           ),
         ]),
       ),
@@ -248,7 +259,7 @@ class FirstScreenState extends State<FirstScreen> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppSizes.fieldRadius),
             child: CustomImage(
-              size: 100,
+              size: 140,
               imageUrl: backgroundUrl,
               fallBackIcon: Icons.photo,
             ),
@@ -286,5 +297,15 @@ class FirstScreenState extends State<FirstScreen> {
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _descriptionController.dispose();
+    _nameFocusNode.dispose();
+    _categoryBloc.close();
+    _imageBloc.close();
+    super.dispose();
   }
 }

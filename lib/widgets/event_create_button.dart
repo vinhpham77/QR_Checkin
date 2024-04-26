@@ -31,7 +31,7 @@ class EventCreateButton extends StatelessWidget {
           onPressed: () {
             context
                 .read<EventBloc>()
-                .add(EventCreatePrefilled(event: EventDto.empty()));
+                .add(EventPrefilled(event: EventDto.empty()));
             context.push(RouteName.eventCreate);
           },
           style: ButtonStyle(

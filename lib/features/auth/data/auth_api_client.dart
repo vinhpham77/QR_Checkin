@@ -3,7 +3,6 @@ import 'package:qr_checkin/config/http_client.dart';
 
 import '../dtos/jwts.dart';
 import '../dtos/login_dto.dart';
-import '../dtos/login_success_dto.dart';
 import '../dtos/register_dto.dart';
 
 class AuthApiClient {
@@ -11,7 +10,7 @@ class AuthApiClient {
 
   AuthApiClient(this.dio);
 
-  Future<LoginSuccessDto> login(LoginDto loginDto) async {
+  Future<JWTs> login(LoginDto loginDto) async {
     try {
       dio.options.headers['device-id'] = await getDeviceId();
       dio.options.headers['device-name'] = await getDeviceName();
@@ -24,7 +23,7 @@ class AuthApiClient {
       );
       dio.interceptors.addAll(interceptors);
 
-      return LoginSuccessDto.fromJson(response.data);
+      return JWTs.fromJson(response.data);
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(e.response!.data['message']);
