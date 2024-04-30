@@ -23,9 +23,9 @@ import '../../widgets/editor.dart';
 
 class FirstScreen extends StatefulWidget {
   final GlobalKey<FormState> formKey;
-  EventDto event;
+  final EventDto event;
 
-  FirstScreen({super.key, required this.formKey, required this.event});
+  const FirstScreen({super.key, required this.formKey, required this.event});
 
   @override
   State<FirstScreen> createState() => FirstScreenState();

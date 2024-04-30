@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/features/event/data/event_api_client.dart';
 import 'package:qr_checkin/features/event/data/event_repository.dart';
+import 'package:qr_checkin/widgets/location_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'config/http_client.dart';
@@ -17,29 +20,38 @@ import 'features/event/bloc/event_bloc.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final sf = await SharedPreferences.getInstance();
-  runApp(MyApp(sharedPreferences: sf));
+  await Geolocator.requestPermission();
+  Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high);
+  LatLng currentLocation = LatLng(position.latitude, position.longitude);
+
+  runApp(MyApp(sharedPreferences: sf, currentLocation: currentLocation));
 }
 
 class MyApp extends StatelessWidget {
   final SharedPreferences sharedPreferences;
+  final LatLng currentLocation;
 
-  const MyApp({super.key, required this.sharedPreferences});
+  const MyApp({super.key, required this.sharedPreferences, required this.currentLocation});
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider(
-      create: (context) => AuthRepository(
-        authApiClient: AuthApiClient(dio),
-        authLocalDataSource: AuthLocalDataSource(sharedPreferences),
-      ),
-      child: BlocProvider(
-        lazy: false,
-        create: (context) {
-          var authRepository = context.read<AuthRepository>();
-          addAccessTokenInterceptor(dio, authRepository);
-          return AuthBloc(authRepository);
-        },
-        child: const AppContent(),
+    return LocationProvider(
+      currentLocation: currentLocation,
+      child: RepositoryProvider(
+        create: (context) => AuthRepository(
+          authApiClient: AuthApiClient(dio),
+          authLocalDataSource: AuthLocalDataSource(sharedPreferences),
+        ),
+        child: BlocProvider(
+          lazy: false,
+          create: (context) {
+            var authRepository = context.read<AuthRepository>();
+            addAccessTokenInterceptor(dio, authRepository);
+            return AuthBloc(authRepository);
+          },
+          child: const AppContent(),
+        ),
       ),
     );
   }
@@ -55,6 +67,14 @@ class AppContent extends StatefulWidget {
 }
 
 class _AppContentState extends State<AppContent> {
+  LatLng? currentLocation;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    currentLocation = LocationProvider.of(context)?.currentLocation;
+  }
+
   @override
   void initState() {
     super.initState();

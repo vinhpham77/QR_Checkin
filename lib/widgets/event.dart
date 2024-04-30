@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../config/theme.dart';
 
@@ -44,25 +46,28 @@ class Event extends StatelessWidget {
             borderRadius: const BorderRadius.all(Radius.circular(16)),
             child: Stack(
               children: [
-                Image.network(
-                  imageUrl!,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Center(
-                      child: Icon(Icons.error),
-                    );
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child;
-                    } else {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  },
-                  fit: BoxFit.cover,
-                  width: 200,
+                SizedBox(
                   height: 112,
+                  width: 200,
+                  child: Image.network(
+                    imageUrl!,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/images/placeholder.png',
+                        fit: BoxFit.cover,
+                      );
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      } else {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+                    },
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 if (isRegistered)
                   Positioned(
@@ -88,33 +93,39 @@ class Event extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 6),
-              Text(
-                title,
-                style: themeData.textTheme.titleSmall,
+              Container(
+                width: 200,
+                child: Text(
+                  title,
+                  overflow: TextOverflow.ellipsis,
+                  style: themeData.textTheme.titleSmall,
+                ),
               ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(children: [
-                    Icon(
-                      Icons.person,
-                      color: themeData.hintColor,
-                      size: 16,
-                    ),
-                    Text(
-                      organizer!,
-                      style: themeData.textTheme.bodyMedium?.copyWith(
+              const SizedBox(height: 2),
+              Container(
+                width: 200,
+                child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.person,
                         color: themeData.hintColor,
+                        size: 16,
                       ),
-                    ),
-                  ]),
-                  const SizedBox(width: 16),
-                  Text(description!,
-                      style: themeData.textTheme.bodyMedium?.copyWith(
-                        color: themeData.hintColor,
-                      )),
-                ],
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.only(left: 2, bottom: 1),
+                          child: Text(
+                            organizer!,
+                            overflow: TextOverflow.ellipsis,
+                            style: themeData.textTheme.bodyMedium?.copyWith(
+                              color: themeData.hintColor,
+                            ),
+                            textAlign: TextAlign.justify,
+                          ),
+                        ),
+                      ),
+                    ]),
               ),
             ],
           ),

@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/config/theme.dart';
+import 'package:qr_checkin/features/event/bloc/event_bloc.dart';
+import 'package:qr_checkin/features/event/dtos/item_counter.dart';
 import 'package:qr_checkin/widgets/event_category.dart';
 
 import '../../widgets/event.dart';
+import '../../widgets/location_provider.dart';
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});
@@ -12,8 +17,70 @@ class EventsScreen extends StatefulWidget {
 }
 
 class _EventsScreenState extends State<EventsScreen> {
+  final String newestEvent = 'Mới nhất';
+  final String latestEvent = 'Vừa cập nhật';
+  final String nearestEvent = 'Gần đây';
+  var newestEvents = ItemCounterDTO(0, []);
+  var latestEvents = ItemCounterDTO(0, []);
+  var nearestEvents = ItemCounterDTO(0, []);
+  LatLng? currentLocation;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    currentLocation = LocationProvider.of(context)?.currentLocation;
+    context.read<EventBloc>().add(EventFetch(
+        fields: ['distance'],
+        category: null,
+        limit: 8,
+        latitude: currentLocation?.latitude ?? 0,
+        longitude: currentLocation?.longitude ?? 0,
+        key: nearestEvent));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final eventState = context.watch<EventBloc>().state;
+
+    switch (eventState) {
+      case EventFetchSuccess(events: final events, key: final key):
+        if (key == nearestEvent) {
+          setState(() {
+            nearestEvents = events;
+          });
+          context.read<EventBloc>().add(EventFetch(
+              fields: ['created_at'],
+              category: null,
+              limit: 8,
+              latitude: currentLocation?.latitude ?? 0,
+              longitude: currentLocation?.longitude ?? 0,
+              key: newestEvent));
+        } else if (key == newestEvent) {
+          setState(() {
+            newestEvents = events;
+          });
+          context.read<EventBloc>().add(EventFetch(
+              fields: ['updated_at'],
+              category: null,
+              limit: 8,
+              latitude: currentLocation?.latitude ?? 0,
+              longitude: currentLocation?.longitude ?? 0,
+              key: latestEvent));
+        } else if (key == latestEvent) {
+          setState(() {
+            latestEvents = events;
+          });
+        }
+        break;
+      default:
+        break;
+    }
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,27 +161,28 @@ class _EventsScreenState extends State<EventsScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Container(
-                  height: 186,
-                  transform: Matrix4.translationValues(-4, -2, 0),
-                  child: ListView.separated(
-                    itemCount: 8,
-                    addRepaintBoundaries: true,
-                    physics: const PageScrollPhysics(),
-                    scrollDirection: Axis.horizontal,
-                    shrinkWrap: true,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(width: 8),
-                    itemBuilder: (context, index) => const Event(
-                      eventId: 1,
-                      imageUrl: 'https://picsum.photos/200/300',
-                      title: 'Sự kiện 1',
-                      organizer: 'Tổ chức 1',
-                      isRegistered: false,
-                      description: 'Mô tả sự kiện 1',
+                  Container(
+                    height: 186,
+                    transform: Matrix4.translationValues(-4, -2, 0),
+                    child: ListView.separated(
+                      itemCount: nearestEvents.items.length,
+                      addRepaintBoundaries: true,
+                      physics: const PageScrollPhysics(),
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 8),
+
+                      itemBuilder: (context, index) => Event(
+                        eventId: nearestEvents.items[index].id,
+                        imageUrl: nearestEvents.items[index].backgroundUrl,
+                        title: nearestEvents.items[index].name,
+                        organizer: nearestEvents.items[index].createdBy,
+                        isRegistered: false,
+                        description: nearestEvents.items[index].description ?? '',
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ),
@@ -127,7 +195,7 @@ class _EventsScreenState extends State<EventsScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      'Nổi bật',
+                      'Mới nhất',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -145,26 +213,78 @@ class _EventsScreenState extends State<EventsScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                Container(
-                  height: 186,
-                  transform: Matrix4.translationValues(-4, -2, 0),
-                  child: ListView.separated(
-                    itemCount: 8,
-                    addRepaintBoundaries: true,
-                    physics: const PageScrollPhysics(),
-                    scrollDirection: Axis.horizontal,
-                    shrinkWrap: true,
-                    separatorBuilder: (context, index) =>
-                    const SizedBox(width: 8),
-                    itemBuilder: (context, index) => const Event(
-                      eventId: 1,
-                      imageUrl: 'https://picsum.photos/200/300',
-                      title: 'Sự kiện 1',
-                      organizer: 'Tổ chức 1',
-                      description: 'Mô tả sự kiện 1', isRegistered: true,
+                  Container(
+                    height: 186,
+                    transform: Matrix4.translationValues(-4, -2, 0),
+                    child: ListView.separated(
+                      itemCount: newestEvents.items.length,
+                      addRepaintBoundaries: true,
+                      physics: const PageScrollPhysics(),
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 8),
+                      itemBuilder: (context, index) => Event(
+                        eventId: newestEvents.items[index].id,
+                        imageUrl: newestEvents.items[index].backgroundUrl,
+                        title: newestEvents.items[index].name,
+                        organizer: newestEvents.items[index].createdBy,
+                        isRegistered: false,
+                        description: newestEvents.items[index].description ?? '',
+                      ),
                     ),
                   ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      latestEvent,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {},
+                      child: const Text(
+                        'Xem thêm',
+                        style: TextStyle(
+                          color: AppColors.lightGray,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 4),
+                  Container(
+                    height: 186,
+                    transform: Matrix4.translationValues(-4, -2, 0),
+                    child: ListView.separated(
+                      itemCount: latestEvents.items.length,
+                      addRepaintBoundaries: true,
+                      physics: const PageScrollPhysics(),
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(width: 8),
+                      itemBuilder: (context, index) => Event(
+                        eventId: latestEvents.items[index].id,
+                        imageUrl: latestEvents.items[index].backgroundUrl,
+                        title: latestEvents.items[index].name,
+                        organizer: latestEvents.items[index].createdBy,
+                        isRegistered: false,
+                        description: latestEvents.items[index].description ?? '',
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

@@ -78,3 +78,32 @@ final class EventUpdateFailure extends EventState {
   @override
   List<Object?> get props => [message];
 }
+
+final class EventFetchSuccess extends EventState {
+  final ItemCounterDTO<EventDto> events;
+  final String key;
+
+  const EventFetchSuccess({required this.events, required this.key});
+
+  @override
+  List<Object?> get props => [events, key];
+}
+
+final class EventFetching extends EventState {
+  final String key;
+
+  const EventFetching({required this.key});
+
+  @override
+  List<Object?> get props => [key];
+}
+
+final class EventFetchFailure extends EventState {
+  final String message;
+  final String key;
+
+  const EventFetchFailure({required this.message, required this.key});
+
+  @override
+  List<Object?> get props => [message, key];
+}

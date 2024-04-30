@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import '../../result_type.dart';
 import '../data/event_repository.dart';
 import '../dtos/event_dto.dart';
+import '../dtos/item_counter.dart';
 
 part 'event_state.dart';
 
@@ -18,6 +19,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<EventCreate>(_createEvent);
     on<EventFetchOne>(_fetchOneEvent);
     on<EventUpdate>(_updateEvent);
+    on<EventFetch>(_fetchEvents);
   }
 
   void _prefillEvent(EventPrefilled event, Emitter<EventState> emit) {
@@ -48,6 +50,25 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     return (switch (result) {
       Success() => emit(EventCreated(event: result.data)),
       Failure() => emit(EventCreateFailure(message: result.message)),
+    });
+  }
+
+  void _fetchEvents(EventFetch event, Emitter<EventState> emit) async {
+    emit(EventFetching(key: event.key));
+    Result result = await eventRepository.getEvents(
+      page: event.page,
+      limit: event.limit,
+      keyword: event.keyword,
+      fields: event.fields,
+      category: event.category,
+      sortField: event.sortField,
+      isAsc: event.isAsc,
+      longitude: event.longitude,
+      latitude: event.latitude,
+    );
+    return (switch (result) {
+      Success() => emit(EventFetchSuccess(events: result.data, key: event.key)),
+      Failure() => emit(EventFetchFailure(message: result.message, key: event.key)),
     });
   }
 }

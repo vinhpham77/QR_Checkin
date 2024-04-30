@@ -44,3 +44,32 @@ final class EventUpdate extends EventEvent {
   @override
   List<Object?> get props => [eventId, event];
 }
+
+final class EventFetch extends EventEvent {
+  final int page;
+  final int limit;
+  final String? keyword;
+  final List<String> fields;
+  final String? category;
+  final String? sortField;
+  final bool? isAsc;
+  final double longitude;
+  final double latitude;
+  final String key;
+
+  const EventFetch({
+    this.page = 1,
+    this.limit = 10,
+    this.keyword,
+    required this.fields,
+    required this.category,
+    this.sortField,
+    this.isAsc,
+    required this.longitude,
+    required this.latitude,
+    required this.key,
+  });
+
+  @override
+  List<Object?> get props => [page, limit, keyword, fields, category, sortField, isAsc, longitude, latitude, key];
+}

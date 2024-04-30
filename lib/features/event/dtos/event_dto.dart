@@ -6,6 +6,7 @@ class EventDto {
   String? backgroundUrl;
   String? description;
   int? slots;
+  double distance;
   DateTime startAt;
   DateTime endAt;
   String location;
@@ -37,6 +38,7 @@ class EventDto {
     required this.latitude,
     required this.longitude,
     this.radius = 20,
+    this.distance = 0,
     this.regisRequired = false,
     this.approvalRequired = false,
     this.captureRequired = false,
@@ -67,7 +69,7 @@ class EventDto {
       regisRequired: json['regisRequired'],
       approvalRequired: json['approvalRequired'],
       captureRequired: json['captureRequired'],
-      categories: (json['categories'] as List).map((e) => CategoryDto.fromJson(e)).toList(),
+      categories: json['categories'] != null ? (json['categories'] as List).map((e) => CategoryDto.fromJson(e)).toList() : [],
       checkinQrCode: json['checkinQrCode'],
       checkoutQrCode: json['checkoutQrCode'],
       createdAt: DateTime.parse(json['createdAt']),
@@ -137,6 +139,7 @@ class EventDto {
     double? latitude,
     double? longitude,
     double? radius,
+    double? distance,
     bool? regisRequired,
     bool? approvalRequired,
     bool? captureRequired,
@@ -157,6 +160,7 @@ class EventDto {
       description: description ?? this.description,
       slots: slots ?? this.slots,
       startAt: startAt ?? this.startAt,
+      distance: distance ?? this.distance,
       endAt: endAt ?? this.endAt,
       location: location ?? this.location,
       latitude: latitude ?? this.latitude,

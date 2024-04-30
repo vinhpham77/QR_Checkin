@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
+import 'package:qr_checkin/features/event/dtos/item_counter.dart';
 
 import '../dtos/event_dto.dart';
 
@@ -14,7 +13,44 @@ class EventApiClient {
       final response = await dio.get('/events/$id');
       return EventDto.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response!.data['message']) {
+      if (e.response != null) {
+        throw Exception(e.response!.data['message']);
+      } else {
+        throw Exception(e.message);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<ItemCounterDTO<EventDto>> getEvents({
+    int page = 1,
+    int limit = 10,
+    String? keyword,
+    required List<String> fields,
+    String? category,
+    String? sortField,
+    bool? isAsc,
+    required double longitude,
+    required double latitude,
+  }) async {
+    try {
+      dio.options.headers['latitude'] = latitude;
+      dio.options.headers['longitude'] = longitude;
+
+      final response = await dio.get('/events', queryParameters: {
+        'page': page,
+        'limit': limit,
+        'keyword': keyword,
+        'isAsc': isAsc,
+        'fields': fields,
+        'category': category,
+        'sortField': sortField,
+      });
+
+      return ItemCounterDTO.fromJson(response.data, (data) => EventDto.fromJson(data));
+    } on DioException catch (e) {
+      if (e.response != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
@@ -30,7 +66,7 @@ class EventApiClient {
       final response = await dio.post('/events', data: event.toJson());
       return EventDto.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response!.data['message']) {
+      if (e.response != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
@@ -45,7 +81,7 @@ class EventApiClient {
       final response = await dio.put('/events/$eventId', data: event.toJson());
       return EventDto.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response!.data['message']) {
+      if (e.response != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
