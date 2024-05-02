@@ -1,5 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:qr_checkin/features/event/dtos/search_criteria.dart';
+import 'package:qr_checkin/screens/event_list/event_list_screen.dart';
+import 'package:qr_checkin/screens/search/search_screen.dart';
 
 import '../features/auth/bloc/auth_bloc.dart';
 import '../screens/cu_event/cu_event_screen.dart';
@@ -18,6 +21,8 @@ class RouteName {
   static const String scanner = '/scanner';
   static const String eventCreate = '/event/create';
   static const String eventUpdate = '/event/:id/update';
+  static const String search = '/search';
+  static const String eventList = '/event/list';
 
   static const publicRoutes = [
     login,
@@ -72,6 +77,15 @@ final router = GoRouter(
         builder: (context, state) {
           int id = state.extra as int;
           return CuEventScreen(id: id);
+        }),
+    GoRoute(
+      path: RouteName.search,
+      builder: (context, state) => const SearchScreen(),
+    ),
+    GoRoute(
+        path: RouteName.eventList,
+        builder: (context, state) {
+          return EventListScreen(searchCriteria: state.extra as SearchCriteria);
         }),
   ],
 );

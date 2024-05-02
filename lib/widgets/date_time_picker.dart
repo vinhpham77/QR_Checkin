@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
+import '../utils/data_utils.dart';
+
 class DateTimePicker extends StatefulWidget {
   final DateTime initialDate;
   final DateTime firstDate;
@@ -25,7 +27,7 @@ class _DateTimePickerState extends State<DateTimePicker> {
   @override
   void initState() {
     super.initState();
-    _controller.text = _formatDateTime(widget.initialDate);
+    _controller.text = formatDateTime(widget.initialDate);
   }
 
   @override
@@ -42,10 +44,6 @@ class _DateTimePickerState extends State<DateTimePicker> {
         ),
       ),
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}g${dateTime.minute}ph';
   }
 
   _openDatePicker(BuildContext context) async {
@@ -82,7 +80,7 @@ class _DateTimePickerState extends State<DateTimePicker> {
         widget.onDateTimeChanged(dateTime);
 
         setState(() {
-          _controller.text = _formatDateTime(dateTime);
+          _controller.text = formatDateTime(dateTime);
         });
       }
     }

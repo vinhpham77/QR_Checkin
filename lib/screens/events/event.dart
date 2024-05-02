@@ -1,8 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
-import '../config/theme.dart';
+import '../../config/theme.dart';
 
 class Event extends StatelessWidget {
   final int? eventId;
@@ -50,7 +48,7 @@ class Event extends StatelessWidget {
                   height: 112,
                   width: 200,
                   child: Image.network(
-                    imageUrl!,
+                    imageUrl ?? '',
                     errorBuilder: (context, error, stackTrace) {
                       return Image.asset(
                         'assets/images/placeholder.png',

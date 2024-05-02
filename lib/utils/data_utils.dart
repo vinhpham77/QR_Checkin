@@ -9,3 +9,11 @@ DateTime? tryParseDateTime(String? formattedString) {
     return null;
   }
 }
+
+String formatDateTime(DateTime dateTime) {
+  return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}g${dateTime.minute}ph';
+}
+
+String formatDate(DateTime dateTime) {
+  return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+}

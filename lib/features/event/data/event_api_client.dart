@@ -28,7 +28,7 @@ class EventApiClient {
     int limit = 10,
     String? keyword,
     required List<String> fields,
-    String? category,
+    int? categoryId,
     String? sortField,
     bool? isAsc,
     required double longitude,
@@ -44,7 +44,7 @@ class EventApiClient {
         'keyword': keyword,
         'isAsc': isAsc,
         'fields': fields,
-        'category': category,
+        'categoryId': categoryId,
         'sortField': sortField,
       });
 

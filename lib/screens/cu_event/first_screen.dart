@@ -78,7 +78,7 @@ class FirstScreenState extends State<FirstScreen> {
         ],
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(
-            'Ảnh bìa',
+            'Ảnh nền',
             style: themeData.textTheme.bodyMedium!,
             textAlign: TextAlign.center,
           ),

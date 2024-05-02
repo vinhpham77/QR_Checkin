@@ -60,7 +60,7 @@ class EventBloc extends Bloc<EventEvent, EventState> {
       limit: event.limit,
       keyword: event.keyword,
       fields: event.fields,
-      category: event.category,
+      categoryId: event.categoryId,
       sortField: event.sortField,
       isAsc: event.isAsc,
       longitude: event.longitude,

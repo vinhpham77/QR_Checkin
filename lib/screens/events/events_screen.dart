@@ -4,10 +4,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/config/theme.dart';
 import 'package:qr_checkin/features/event/bloc/event_bloc.dart';
 import 'package:qr_checkin/features/event/dtos/item_counter.dart';
-import 'package:qr_checkin/widgets/event_category.dart';
+import 'package:qr_checkin/features/event/dtos/search_criteria.dart';
 
-import '../../widgets/event.dart';
+import '../../config/router.dart';
 import '../../widgets/location_provider.dart';
+import 'event.dart';
 
 class EventsScreen extends StatefulWidget {
   const EventsScreen({super.key});
@@ -33,14 +34,18 @@ class _EventsScreenState extends State<EventsScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    currentLocation = LocationProvider.of(context)?.currentLocation;
-    context.read<EventBloc>().add(EventFetch(
-        fields: ['distance'],
-        category: null,
-        limit: 8,
-        latitude: currentLocation?.latitude ?? 0,
-        longitude: currentLocation?.longitude ?? 0,
-        key: nearestEvent));
+    var newCurrentLocation = LocationProvider.of(context)?.currentLocation;
+
+    if (currentLocation == null) {
+      currentLocation = newCurrentLocation;
+      context.read<EventBloc>().add(EventFetch(
+          fields: const ['created_at'],
+          categoryId: null,
+          limit: 8,
+          latitude: currentLocation?.latitude ?? 0,
+          longitude: currentLocation?.longitude ?? 0,
+          key: nearestEvent));
+    }
   }
 
   @override
@@ -50,31 +55,25 @@ class _EventsScreenState extends State<EventsScreen> {
     switch (eventState) {
       case EventFetchSuccess(events: final events, key: final key):
         if (key == nearestEvent) {
-          setState(() {
-            nearestEvents = events;
-          });
+          nearestEvents = events;
           context.read<EventBloc>().add(EventFetch(
-              fields: ['created_at'],
-              category: null,
+              fields: const ['created_at'],
+              categoryId: null,
               limit: 8,
               latitude: currentLocation?.latitude ?? 0,
               longitude: currentLocation?.longitude ?? 0,
               key: newestEvent));
         } else if (key == newestEvent) {
-          setState(() {
-            newestEvents = events;
-          });
+          newestEvents = events;
           context.read<EventBloc>().add(EventFetch(
-              fields: ['updated_at'],
-              category: null,
+              fields: const ['updated_at'],
+              categoryId: null,
               limit: 8,
               latitude: currentLocation?.latitude ?? 0,
               longitude: currentLocation?.longitude ?? 0,
               key: latestEvent));
         } else if (key == latestEvent) {
-          setState(() {
-            latestEvents = events;
-          });
+          latestEvents = events;
         }
         break;
       default:
@@ -126,7 +125,9 @@ class _EventsScreenState extends State<EventsScreen> {
                           ),
                         ],
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        router.push(RouteName.search);
+                      },
                     ),
                   ),
                 ),
@@ -150,7 +151,16 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        router.push(RouteName.eventList,
+                            extra: SearchCriteria(
+                                title: 'Sự kiện gần đây',
+                                keyword: '',
+                                categoryId: null,
+                                sortField: 'distance',
+                                isAsc: true,
+                                fields: []));
+                      },
                       child: const Text(
                         'Xem thêm',
                         style: TextStyle(
@@ -161,28 +171,27 @@ class _EventsScreenState extends State<EventsScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                  Container(
-                    height: 186,
-                    transform: Matrix4.translationValues(-4, -2, 0),
-                    child: ListView.separated(
-                      itemCount: nearestEvents.items.length,
-                      addRepaintBoundaries: true,
-                      physics: const PageScrollPhysics(),
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 8),
-
-                      itemBuilder: (context, index) => Event(
-                        eventId: nearestEvents.items[index].id,
-                        imageUrl: nearestEvents.items[index].backgroundUrl,
-                        title: nearestEvents.items[index].name,
-                        organizer: nearestEvents.items[index].createdBy,
-                        isRegistered: false,
-                        description: nearestEvents.items[index].description ?? '',
-                      ),
+                Container(
+                  height: 186,
+                  transform: Matrix4.translationValues(-4, -2, 0),
+                  child: ListView.separated(
+                    itemCount: nearestEvents.items.length,
+                    addRepaintBoundaries: true,
+                    physics: const PageScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 8),
+                    itemBuilder: (context, index) => Event(
+                      eventId: nearestEvents.items[index].id,
+                      imageUrl: nearestEvents.items[index].backgroundUrl,
+                      title: nearestEvents.items[index].name,
+                      organizer: nearestEvents.items[index].createdBy,
+                      isRegistered: false,
+                      description: nearestEvents.items[index].description ?? '',
                     ),
                   ),
+                ),
               ],
             ),
           ),
@@ -202,7 +211,16 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        router.push(RouteName.eventList,
+                            extra: SearchCriteria(
+                                title: 'Sự kiện mới nhất',
+                                keyword: '',
+                                categoryId: null,
+                                sortField: 'created_at',
+                                isAsc: false,
+                                fields: []));
+                      },
                       child: const Text(
                         'Xem thêm',
                         style: TextStyle(
@@ -213,27 +231,27 @@ class _EventsScreenState extends State<EventsScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                  Container(
-                    height: 186,
-                    transform: Matrix4.translationValues(-4, -2, 0),
-                    child: ListView.separated(
-                      itemCount: newestEvents.items.length,
-                      addRepaintBoundaries: true,
-                      physics: const PageScrollPhysics(),
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 8),
-                      itemBuilder: (context, index) => Event(
-                        eventId: newestEvents.items[index].id,
-                        imageUrl: newestEvents.items[index].backgroundUrl,
-                        title: newestEvents.items[index].name,
-                        organizer: newestEvents.items[index].createdBy,
-                        isRegistered: false,
-                        description: newestEvents.items[index].description ?? '',
-                      ),
+                Container(
+                  height: 186,
+                  transform: Matrix4.translationValues(-4, -2, 0),
+                  child: ListView.separated(
+                    itemCount: newestEvents.items.length,
+                    addRepaintBoundaries: true,
+                    physics: const PageScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    shrinkWrap: true,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(width: 8),
+                    itemBuilder: (context, index) => Event(
+                      eventId: newestEvents.items[index].id,
+                      imageUrl: newestEvents.items[index].backgroundUrl,
+                      title: newestEvents.items[index].name,
+                      organizer: newestEvents.items[index].createdBy,
+                      isRegistered: false,
+                      description: newestEvents.items[index].description ?? '',
                     ),
                   ),
+                ),
               ],
             ),
           ),
@@ -253,7 +271,16 @@ class _EventsScreenState extends State<EventsScreen> {
                       ),
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        router.push(RouteName.eventList,
+                            extra: SearchCriteria(
+                                title: 'Sự kiện vừa cập nhật',
+                                keyword: '',
+                                categoryId: null,
+                                sortField: 'updated_at',
+                                isAsc: false,
+                                fields: []));
+                      },
                       child: const Text(
                         'Xem thêm',
                         style: TextStyle(
@@ -264,58 +291,25 @@ class _EventsScreenState extends State<EventsScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                  Container(
-                    height: 186,
-                    transform: Matrix4.translationValues(-4, -2, 0),
-                    child: ListView.separated(
-                      itemCount: latestEvents.items.length,
-                      addRepaintBoundaries: true,
-                      physics: const PageScrollPhysics(),
-                      scrollDirection: Axis.horizontal,
-                      shrinkWrap: true,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 8),
-                      itemBuilder: (context, index) => Event(
-                        eventId: latestEvents.items[index].id,
-                        imageUrl: latestEvents.items[index].backgroundUrl,
-                        title: latestEvents.items[index].name,
-                        organizer: latestEvents.items[index].createdBy,
-                        isRegistered: false,
-                        description: latestEvents.items[index].description ?? '',
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Danh mục',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
                 Container(
-                  height: 184,
+                  height: 186,
                   transform: Matrix4.translationValues(-4, -2, 0),
                   child: ListView.separated(
-                    itemCount: 8,
+                    itemCount: latestEvents.items.length,
                     addRepaintBoundaries: true,
-                    physics: const BouncingScrollPhysics(),
+                    physics: const PageScrollPhysics(),
                     scrollDirection: Axis.horizontal,
                     shrinkWrap: true,
                     separatorBuilder: (context, index) =>
                         const SizedBox(width: 8),
-                    itemBuilder: (context, index) => EventCategory(
-                        category: "Thể thao",
-                        icon: Icons.sports,
-                        onTap: () => {}),
+                    itemBuilder: (context, index) => Event(
+                      eventId: latestEvents.items[index].id,
+                      imageUrl: latestEvents.items[index].backgroundUrl,
+                      title: latestEvents.items[index].name,
+                      organizer: latestEvents.items[index].createdBy,
+                      isRegistered: false,
+                      description: latestEvents.items[index].description ?? '',
+                    ),
                   ),
                 ),
               ],

@@ -168,6 +168,7 @@ final themeData = ThemeData(
         fontSize: 18,
         fontWeight: FontWeight.w400,
       ),
+      centerTitle: true,
       toolbarTextStyle: TextStyle(
         color: AppColors.black,
         fontSize: 18,
@@ -191,5 +192,29 @@ final themeData = ThemeData(
       }
       return AppColors.lightGray;
     }),
+  ),
+  chipTheme: ChipThemeData(
+    color: MaterialStateProperty.resolveWith((states) {
+      if (states.contains(MaterialState.selected)) {
+        return AppColors.lightTurquoise;
+      }
+
+      return AppColors.white;
+    }),
+    backgroundColor: AppColors.white,
+    showCheckmark: false,
+    padding: const EdgeInsets.all(8),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(AppSizes.fieldRadius),
+    ),
+    labelStyle: const TextStyle(
+      color: AppColors.black,
+      fontSize: 14,
+    ),
+    secondaryLabelStyle: const TextStyle(
+      color: AppColors.white,
+      fontSize: 14,
+    ),
+    brightness: Brightness.light,
   ),
 );

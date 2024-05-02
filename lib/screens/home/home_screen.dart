@@ -59,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
             children: [
+              // TODO: Prevent the page from being rebuilt when switching between tabs
               const EventsScreen(),
               const Center(
                 child: Text('Đã đăng ký'),
