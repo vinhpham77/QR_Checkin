@@ -6,6 +6,7 @@ import 'package:qr_checkin/screens/search/search_screen.dart';
 
 import '../features/auth/bloc/auth_bloc.dart';
 import '../screens/cu_event/cu_event_screen.dart';
+import '../screens/event_detail/event_detail_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/login/login_screen.dart';
 import '../screens/qr_scanner/qr_scanner.dart';
@@ -20,9 +21,10 @@ class RouteName {
   static const String favorites = '/favorites';
   static const String scanner = '/scanner';
   static const String eventCreate = '/event/create';
-  static const String eventUpdate = '/event/:id/update';
+  static const String eventUpdate = '/event/update/:id';
   static const String search = '/search';
   static const String eventList = '/event/list';
+  static const String eventDetail = '/event/:id';
 
   static const publicRoutes = [
     login,
@@ -86,6 +88,12 @@ final router = GoRouter(
         path: RouteName.eventList,
         builder: (context, state) {
           return EventListScreen(searchCriteria: state.extra as SearchCriteria);
+        }),
+    GoRoute(
+        path: RouteName.eventDetail,
+        builder: (context, state) {
+          int id = state.extra as int;
+          return EventDetailScreen(eventId: id);
         }),
   ],
 );

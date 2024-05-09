@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
+import 'package:qr_checkin/utils/data_utils.dart';
+
+import '../../../config/user_info.dart';
 import '../../result_type.dart';
 import '../dtos/login_dto.dart';
 import '../dtos/register_dto.dart';
@@ -25,6 +29,8 @@ class AuthRepository {
       final loginSuccessDto = await authApiClient.login(
         LoginDto(username: username, password: password),
       );
+
+      setUserInfo(loginSuccessDto.accessToken);
 
       await Future.wait([
         authLocalDataSource.saveToken(
@@ -63,6 +69,8 @@ class AuthRepository {
         return Failure('No access token found');
       }
 
+      setUserInfo(token);
+
       return Success(token);
     } on Exception catch (e) {
       log('$e');
@@ -94,6 +102,8 @@ class AuthRepository {
       } else {
         final refreshToken = (result as Success).data;
         final loginSuccessDto = await authApiClient.refreshToken(refreshToken!);
+
+        setUserInfo(loginSuccessDto.accessToken);
 
         await Future.wait([
           authLocalDataSource.saveToken(

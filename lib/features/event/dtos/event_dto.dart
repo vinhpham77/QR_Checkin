@@ -1,3 +1,5 @@
+import 'package:qr_checkin/features/ticket/dtos/ticket_type_dto.dart';
+
 import '../../category/dtos/category_dto.dart';
 
 class EventDto {
@@ -7,12 +9,14 @@ class EventDto {
   String? description;
   int? slots;
   double distance;
+  List<TicketTypeDto> ticketTypes;
   DateTime startAt;
   DateTime endAt;
   String location;
   double latitude;
   double longitude;
   double radius;
+  bool isTicketSeller;
   bool regisRequired;
   bool approvalRequired;
   bool captureRequired;
@@ -32,6 +36,8 @@ class EventDto {
     required this.name,
     this.description,
     this.slots,
+    this.ticketTypes = const [],
+    required this.isTicketSeller,
     required this.startAt,
     required this.endAt,
     required this.location,
@@ -60,10 +66,12 @@ class EventDto {
       backgroundUrl: json['backgroundUrl'],
       description: json['description'],
       slots: json['slots'],
+      ticketTypes: json['ticketTypes'] != null ? (json['ticketTypes'] as List).map((e) => TicketTypeDto.fromJson(e)).toList() : [],
       startAt: DateTime.parse(json['startAt']),
       endAt: DateTime.parse(json['endAt']),
       location: json['location'],
       latitude: json['latitude'],
+      isTicketSeller: json['isTicketSeller'],
       longitude: json['longitude'],
       radius: json['radius'],
       regisRequired: json['regisRequired'],
@@ -88,6 +96,7 @@ class EventDto {
       backgroundUrl: null,
       description: '',
       location: '',
+      isTicketSeller: false,
       startAt: DateTime.now(),
       endAt: DateTime.now(),
       latitude: 0,
@@ -113,6 +122,8 @@ class EventDto {
       'latitude': latitude.toString(),
       'longitude': longitude.toString(),
       'radius': radius,
+      'ticketTypes': ticketTypes.map((e) => e.toJson()).toList(),
+      'isTicketSeller': isTicketSeller,
       'regisRequired': regisRequired,
       'approvalRequired': approvalRequired,
       'captureRequired': captureRequired,
@@ -139,6 +150,7 @@ class EventDto {
     double? latitude,
     double? longitude,
     double? radius,
+    bool? isTicketSeller,
     double? distance,
     bool? regisRequired,
     bool? approvalRequired,
@@ -147,6 +159,7 @@ class EventDto {
     String? checkinQrCode,
     String? checkoutQrCode,
     DateTime? createdAt,
+    List<TicketTypeDto>? ticketTypes,
     String? createdBy,
     DateTime? updatedAt,
     String? updatedBy,
@@ -162,10 +175,12 @@ class EventDto {
       startAt: startAt ?? this.startAt,
       distance: distance ?? this.distance,
       endAt: endAt ?? this.endAt,
+      ticketTypes: ticketTypes ?? this.ticketTypes,
       location: location ?? this.location,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       radius: radius ?? this.radius,
+      isTicketSeller: isTicketSeller ?? this.isTicketSeller,
       regisRequired: regisRequired ?? this.regisRequired,
       approvalRequired: approvalRequired ?? this.approvalRequired,
       captureRequired: captureRequired ?? this.captureRequired,

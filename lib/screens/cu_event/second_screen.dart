@@ -10,10 +10,9 @@ import '../../features/event/dtos/event_dto.dart';
 import '../../widgets/gmap.dart';
 
 class SecondScreen extends StatefulWidget {
-  final GlobalKey<FormState> formKey;
   final EventDto event;
 
-  const SecondScreen({super.key, required this.formKey, required this.event});
+  const SecondScreen({super.key, required this.event});
 
   @override
   State<SecondScreen> createState() => SecondScreenState();
@@ -29,6 +28,7 @@ class SecondScreenState extends State<SecondScreen> {
   final _locationFocusNode = FocusNode();
   final _radiusKey = GlobalKey<FormFieldState>();
   final _radiusFocusNode = FocusNode();
+  final formKey = GlobalKey<FormState>();
 
   String get location => _locationController.text;
   DateTime get startAt => _startTime;
@@ -62,7 +62,7 @@ class SecondScreenState extends State<SecondScreen> {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: widget.formKey,
+      key: formKey,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Thời gian bắt đầu',
             style: themeData.textTheme.bodyMedium!),
@@ -198,6 +198,8 @@ class SecondScreenState extends State<SecondScreen> {
     _radiusController.dispose();
     _locationFocusNode.dispose();
     _radiusFocusNode.dispose();
+    _radiusKey.currentState?.dispose();
+    _locationKey.currentState?.dispose();
     super.dispose();
   }
 }

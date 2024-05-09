@@ -107,3 +107,40 @@ final class EventFetchFailure extends EventState {
   @override
   List<Object?> get props => [message, key];
 }
+
+final class EventRegistering extends EventState {
+}
+
+final class EventRegisterSuccess extends EventState {
+
+}
+
+final class EventRegisterFailure extends EventState {
+  final String message;
+
+  const EventRegisterFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+final class EventQrCodeGenerating extends EventState {
+}
+
+final class EventQrCodeGenerated extends EventState {
+  final String code;
+
+  const EventQrCodeGenerated({required this.code});
+
+  @override
+  List<Object?> get props => [code];
+}
+
+final class EventQrCodeGenerateFailure extends EventState {
+  final String message;
+
+  const EventQrCodeGenerateFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}

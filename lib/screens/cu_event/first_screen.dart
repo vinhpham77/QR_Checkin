@@ -22,10 +22,9 @@ import '../../widgets/custom_image.dart';
 import '../../widgets/editor.dart';
 
 class FirstScreen extends StatefulWidget {
-  final GlobalKey<FormState> formKey;
   final EventDto event;
 
-  const FirstScreen({super.key, required this.formKey, required this.event});
+  const FirstScreen({super.key, required this.event});
 
   @override
   State<FirstScreen> createState() => FirstScreenState();
@@ -42,6 +41,7 @@ class FirstScreenState extends State<FirstScreen> {
   late ImageBloc _imageBloc;
   final _nameKey = GlobalKey<FormFieldState>();
   final _nameFocusNode = FocusNode();
+  final formKey = GlobalKey<FormState>();
 
   String get name => _nameController.text;
   Future<String> get description => _descriptionController.getText();
@@ -70,7 +70,7 @@ class FirstScreenState extends State<FirstScreen> {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: widget.formKey,
+      key: formKey,
       child: MultiBlocProvider(
         providers: [
           BlocProvider.value(value: _categoryBloc),
@@ -306,6 +306,7 @@ class FirstScreenState extends State<FirstScreen> {
     _nameFocusNode.dispose();
     _categoryBloc.close();
     _imageBloc.close();
+    _nameKey.currentState?.dispose();
     super.dispose();
   }
 }

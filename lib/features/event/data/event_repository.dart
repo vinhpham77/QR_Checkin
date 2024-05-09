@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 
 import '../../result_type.dart';
@@ -14,9 +16,8 @@ class EventRepository {
     try {
       final event = await eventApiClient.get(id);
       return Success(event);
-    } on DioException catch (e) {
-      return Failure.fromException(e);
-    } catch (e) {
+    } on Exception catch (e) {
+      log('$e');
       return Failure.fromException(e);
     }
   }
@@ -25,9 +26,8 @@ class EventRepository {
     try {
       final createdEvent = await eventApiClient.createEvent(event);
       return Success(createdEvent);
-    } on DioException catch (e) {
-      return Failure.fromException(e);
-    } catch (e) {
+    } on Exception catch (e) {
+      log('$e');
       return Failure.fromException(e);
     }
   }
@@ -36,9 +36,8 @@ class EventRepository {
     try {
       final updatedEvent = await eventApiClient.updateEvent(eventId, event);
       return Success(updatedEvent);
-    } on DioException catch (e) {
-      return Failure.fromException(e);
-    } catch (e) {
+    } on Exception catch (e) {
+      log('$e');
       return Failure.fromException(e);
     }
   }
@@ -67,9 +66,28 @@ class EventRepository {
         longitude: longitude,
       );
       return Success(events);
-    } on DioException catch (e) {
+    } on Exception catch (e) {
+      log('$e');
       return Failure.fromException(e);
-    } catch (e) {
+    }
+  }
+
+  Future<Result<void>> registerEvent(int eventId) async {
+    try {
+      await eventApiClient.registerEvent(eventId);
+      return Success(null);
+    } on Exception catch (e) {
+      log('$e');
+      return Failure.fromException(e);
+    }
+  }
+
+  Future<Result<String>> createQrCode({required int eventId, required bool isCheckIn}) async {
+    try {
+      final code = await eventApiClient.createQrCode(eventId: eventId, isCheckIn: isCheckIn);
+      return Success(code);
+    } on Exception catch (e) {
+      log('$e');
       return Failure.fromException(e);
     }
   }

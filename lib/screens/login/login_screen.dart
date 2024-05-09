@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/config/theme.dart';
+import 'package:qr_checkin/utils/data_utils.dart';
 import 'package:qr_checkin/utils/theme_ext.dart';
 
 import '../../config/http_client.dart';
@@ -75,7 +76,8 @@ class _LoginScreenState extends State<LoginScreen> {
             case AuthLoginSuccess():
               context.read<AuthBloc>().add(AuthAuthenticateStarted());
               break;
-            case AuthAuthenticateSuccess():
+            case AuthAuthenticateSuccess(token: final jwt):
+              setUserInfo(jwt);
               context.go(RouteName.home);
               break;
             default:

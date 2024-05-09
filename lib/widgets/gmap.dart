@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../config/theme.dart';
+import 'location_provider.dart';
 
 class GMap extends StatefulWidget {
   final double radius;
@@ -18,7 +19,7 @@ class GMap extends StatefulWidget {
 }
 
 class _GMapState extends State<GMap> {
-  LatLng? _currentPosition;
+  LatLng? _currentLocation;
   final Set<Marker> _markers = {};
   final Set<Circle> _circles = {};
   late GoogleMapController mapController;
@@ -47,33 +48,21 @@ class _GMapState extends State<GMap> {
           strokeWidth: 1,
         ),
       );
-    } else {
-      _markers.add(
-        Marker(
-          markerId: const MarkerId('current'),
-          position: _currentPosition!,
-          infoWindow: InfoWindow.noText,
-        ),
-      );
-
-      _circles.add(
-        Circle(
-          circleId: const CircleId('current'),
-          center: _currentPosition!,
-          radius: widget.radius,
-          fillColor: Colors.blue.withOpacity(0.3),
-          strokeColor: Colors.blue,
-          strokeWidth: 1,
-        ),
-      );
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _currentLocation = LocationProvider.of(context)?.currentLocation;
   }
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppSizes.fieldRadius),
-      child: _currentPosition == null
+      child: _currentLocation == null
           ? const Center(child: CircularProgressIndicator())
           : GoogleMap(
               gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
@@ -110,7 +99,7 @@ class _GMapState extends State<GMap> {
 
                   widget.onLocationChanged(latLng);
                   setState(() {
-                    _currentPosition = latLng;
+                    _currentLocation = latLng;
                   });
                 });
               },
@@ -125,7 +114,7 @@ class _GMapState extends State<GMap> {
               zoomGesturesEnabled: true,
               onMapCreated: _onMapCreated,
               initialCameraPosition: CameraPosition(
-                target: widget.latLng ?? _currentPosition!,
+                target: widget.latLng ?? _currentLocation!,
                 zoom: 18,
               ),
             ),
@@ -143,7 +132,7 @@ class _GMapState extends State<GMap> {
     LatLng location = LatLng(lat, long);
 
     setState(() {
-      _currentPosition = location;
+      _currentLocation = location;
     });
   }
 

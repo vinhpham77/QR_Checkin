@@ -20,6 +20,8 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<EventFetchOne>(_fetchOneEvent);
     on<EventUpdate>(_updateEvent);
     on<EventFetch>(_fetchEvents);
+    on<EventRegister>(_registerEvent);
+    on<EventCreateQrCode>(_createQrCode);
   }
 
   void _prefillEvent(EventPrefilled event, Emitter<EventState> emit) {
@@ -69,6 +71,24 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     return (switch (result) {
       Success() => emit(EventFetchSuccess(events: result.data, key: event.key)),
       Failure() => emit(EventFetchFailure(message: result.message, key: event.key)),
+    });
+  }
+
+  Future<void> _registerEvent(EventRegister event, Emitter<EventState> emit) async {
+    emit(EventRegistering());
+    Result result = await eventRepository.registerEvent(event.eventId);
+    return (switch (result) {
+      Success() => emit(EventRegisterSuccess()),
+      Failure() => emit(EventRegisterFailure(message: result.message)),
+    });
+  }
+
+  void _createQrCode(EventCreateQrCode event, Emitter<EventState> emit) async {
+    emit(EventQrCodeGenerating());
+    Result result = await eventRepository.createQrCode(eventId: event.eventId, isCheckIn: event.isCheckIn);
+    return (switch (result) {
+      Success() => emit(EventQrCodeGenerated(code: result.data)),
+      Failure() => emit(EventQrCodeGenerateFailure(message: result.message)),
     });
   }
 }

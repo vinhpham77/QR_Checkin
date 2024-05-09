@@ -50,7 +50,7 @@ class EventApiClient {
 
       return ItemCounterDTO.fromJson(response.data, (data) => EventDto.fromJson(data));
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
@@ -80,6 +80,40 @@ class EventApiClient {
     try {
       final response = await dio.put('/events/$eventId', data: event.toJson());
       return EventDto.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.response != null) {
+        throw Exception(e.response!.data['message']);
+      } else {
+        throw Exception(e.message);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<void> registerEvent(int eventId) async {
+    try {
+      await dio.post('/registrations/register', data: {
+        'eventId': eventId,
+      });
+    } on DioException catch (e) {
+      if (e.response != null) {
+        throw Exception(e.response!.data['message']);
+      } else {
+        throw Exception(e.message);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<String> createQrCode({required int eventId, required bool isCheckIn}) async {
+    try {
+      final response = await dio.post('events/generate-qr', data: {
+        'eventId': eventId,
+        'isCheckIn': isCheckIn,
+      });
+      return response.data;
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception(e.response!.data['message']);

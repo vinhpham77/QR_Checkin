@@ -39,7 +39,9 @@ class _EventsScreenState extends State<EventsScreen> {
     if (currentLocation == null) {
       currentLocation = newCurrentLocation;
       context.read<EventBloc>().add(EventFetch(
-          fields: const ['created_at'],
+          fields: [],
+          sortField: 'distance',
+          isAsc: true,
           categoryId: null,
           limit: 8,
           latitude: currentLocation?.latitude ?? 0,
@@ -57,7 +59,9 @@ class _EventsScreenState extends State<EventsScreen> {
         if (key == nearestEvent) {
           nearestEvents = events;
           context.read<EventBloc>().add(EventFetch(
-              fields: const ['created_at'],
+              sortField: 'created_at',
+              fields: [],
+              isAsc: false,
               categoryId: null,
               limit: 8,
               latitude: currentLocation?.latitude ?? 0,
@@ -66,7 +70,9 @@ class _EventsScreenState extends State<EventsScreen> {
         } else if (key == newestEvent) {
           newestEvents = events;
           context.read<EventBloc>().add(EventFetch(
-              fields: const ['updated_at'],
+              fields: [],
+              sortField: 'updated_at',
+              isAsc: false,
               categoryId: null,
               limit: 8,
               latitude: currentLocation?.latitude ?? 0,

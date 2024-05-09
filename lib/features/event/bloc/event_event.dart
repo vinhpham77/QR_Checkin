@@ -73,3 +73,22 @@ final class EventFetch extends EventEvent {
   @override
   List<Object?> get props => [page, limit, keyword, fields, categoryId, sortField, isAsc, longitude, latitude, key];
 }
+
+final class EventRegister extends EventEvent {
+  final int eventId;
+
+  const EventRegister({required this.eventId});
+
+  @override
+  List<Object?> get props => [eventId];
+}
+
+final class EventCreateQrCode extends EventEvent {
+  final int eventId;
+  final bool isCheckIn;
+
+  const EventCreateQrCode({required this.eventId, required this.isCheckIn});
+
+  @override
+  List<Object?> get props => [eventId, isCheckIn];
+}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:qr_checkin/config/router.dart';
 import 'package:qr_checkin/features/event/bloc/event_bloc.dart';
 import 'package:qr_checkin/screens/cu_event/second_screen.dart';
 import 'package:qr_checkin/screens/cu_event/third_screen.dart';
@@ -23,15 +24,9 @@ class _CuEventScreenState extends State<CuEventScreen> {
   int count = 3;
 
   bool isLoading = false;
-  final _formKeys = [
-    GlobalKey<FormState>(),
-    GlobalKey<FormState>(),
-    GlobalKey<FormState>(),
-  ];
-
-  final _firstScreenKey = GlobalKey<FirstScreenState>();
-  final _secondScreenKey = GlobalKey<SecondScreenState>();
-  final _thirdScreenKey = GlobalKey<ThirdScreenState>();
+  var _firstScreenKey = GlobalKey<FirstScreenState>();
+  var _secondScreenKey = GlobalKey<SecondScreenState>();
+  var _thirdScreenKey = GlobalKey<ThirdScreenState>();
   late EventDto event;
 
   @override
@@ -74,7 +69,7 @@ class _CuEventScreenState extends State<CuEventScreen> {
           listener: (context, state) {
             switch (state) {
               case EventCreated():
-                Navigator.of(context).pop();
+                router.push(RouteName.eventDetail, extra: state.event.id);
                 break;
               default:
                 break;
@@ -203,22 +198,19 @@ class _CuEventScreenState extends State<CuEventScreen> {
       steps: [
         Step(
           title: const Text('Mô tả'),
-          content: FirstScreen(
-              formKey: _formKeys[0], key: _firstScreenKey, event: event),
+          content: FirstScreen(key: _firstScreenKey, event: event),
           isActive: _index == 0,
           state: _index == 0 ? StepState.editing : StepState.complete,
         ),
         Step(
           title: const Text('Vị trí'),
-          content: SecondScreen(
-              formKey: _formKeys[1], key: _secondScreenKey, event: event),
+          content: SecondScreen(key: _secondScreenKey, event: event),
           isActive: _index == 1,
           state: _index == 1 ? StepState.editing : StepState.complete,
         ),
         Step(
           title: const Text('Tuỳ chọn'),
-          content: ThirdScreen(
-              formKey: _formKeys[2], key: _thirdScreenKey, event: event),
+          content: ThirdScreen(key: _thirdScreenKey, event: event),
           isActive: _index == 2,
           state: _index == 2 ? StepState.editing : StepState.complete,
         ),
@@ -236,13 +228,25 @@ class _CuEventScreenState extends State<CuEventScreen> {
       return;
     }
 
-    for (var i = 0; i < count; i++) {
-      if (!_formKeys[i].currentState!.validate()) {
-        setState(() {
-          _index = i;
-        });
-        return;
-      }
+    if (!firstScreen.formKey.currentState!.validate()) {
+      setState(() {
+        _index = 0;
+      });
+      return;
+    }
+
+    if (!secondScreen.formKey.currentState!.validate()) {
+      setState(() {
+        _index = 1;
+      });
+      return;
+    }
+
+    if (!thirdScreen.formKey.currentState!.validate()) {
+      setState(() {
+        _index = 2;
+      });
+      return;
     }
 
     String description = await firstScreen.description;
@@ -259,6 +263,8 @@ class _CuEventScreenState extends State<CuEventScreen> {
       startAt: secondScreen.startAt,
       endAt: secondScreen.endAt,
       slots: thirdScreen.slots,
+      isTicketSeller: thirdScreen.isTicketSeller,
+      ticketTypes: thirdScreen.ticketTypes,
       categories: firstScreen.selectedCategories,
       checkinQrCode: thirdScreen.checkinQrCode,
       checkoutQrCode: thirdScreen.checkoutQrCode,
@@ -278,9 +284,6 @@ class _CuEventScreenState extends State<CuEventScreen> {
 
   @override
   void dispose() {
-    _firstScreenKey.currentState?.dispose();
-    _secondScreenKey.currentState?.dispose();
-    _thirdScreenKey.currentState?.dispose();
     super.dispose();
   }
 }
