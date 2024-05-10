@@ -5,12 +5,12 @@ import 'package:qr_checkin/config/router.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/result_type.dart';
 
-const real = 'http://192.168.1.10:8888/api';
+const real = 'http://192.168.150.55:8888/api';
 const simulator = 'http://10.0.2.2:8888/api';
 
 final dio = Dio(
   BaseOptions(
-    baseUrl: simulator,
+    baseUrl: real,
   ),
 );
 

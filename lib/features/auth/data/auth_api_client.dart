@@ -25,7 +25,7 @@ class AuthApiClient {
 
       return JWTs.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
@@ -42,7 +42,7 @@ class AuthApiClient {
         data: registerDto.toJson(),
       );
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
@@ -59,7 +59,7 @@ class AuthApiClient {
         data: refreshToken,
       );
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
@@ -78,7 +78,7 @@ class AuthApiClient {
 
       return JWTs.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);

@@ -13,7 +13,7 @@ class CategoryApiClient {
         data: {'category': category},
       );
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
@@ -30,7 +30,7 @@ class CategoryApiClient {
           .map((category) => CategoryDto.fromJson(category))
           .toList();
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response?.data['message']);
       } else {
         throw Exception(e.message);

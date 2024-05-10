@@ -13,7 +13,7 @@ class EventApiClient {
       final response = await dio.get('/events/$id');
       return EventDto.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
@@ -66,7 +66,7 @@ class EventApiClient {
       final response = await dio.post('/events', data: event.toJson());
       return EventDto.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
@@ -81,7 +81,7 @@ class EventApiClient {
       final response = await dio.put('/events/$eventId', data: event.toJson());
       return EventDto.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
@@ -97,7 +97,7 @@ class EventApiClient {
         'eventId': eventId,
       });
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);
@@ -109,13 +109,13 @@ class EventApiClient {
 
   Future<String> createQrCode({required int eventId, required bool isCheckIn}) async {
     try {
-      final response = await dio.post('events/generate-qr', data: {
+      final response = await dio.post('/events/generate-qr', data: {
         'eventId': eventId,
         'isCheckIn': isCheckIn,
       });
       return response.data;
     } on DioException catch (e) {
-      if (e.response != null) {
+      if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);

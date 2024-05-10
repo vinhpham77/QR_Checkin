@@ -24,9 +24,9 @@ class _CuEventScreenState extends State<CuEventScreen> {
   int count = 3;
 
   bool isLoading = false;
-  var _firstScreenKey = GlobalKey<FirstScreenState>();
-  var _secondScreenKey = GlobalKey<SecondScreenState>();
-  var _thirdScreenKey = GlobalKey<ThirdScreenState>();
+  final _firstScreenKey = GlobalKey<FirstScreenState>();
+  final _secondScreenKey = GlobalKey<SecondScreenState>();
+  final _thirdScreenKey = GlobalKey<ThirdScreenState>();
   late EventDto event;
 
   @override
@@ -69,7 +69,7 @@ class _CuEventScreenState extends State<CuEventScreen> {
           listener: (context, state) {
             switch (state) {
               case EventCreated():
-                router.push(RouteName.eventDetail, extra: state.event.id);
+                router.pushReplacement(RouteName.eventDetail, extra: state.event.id);
                 break;
               default:
                 break;

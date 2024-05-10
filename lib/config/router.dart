@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/features/event/dtos/search_criteria.dart';
+import 'package:qr_checkin/features/qr_event.dart';
 import 'package:qr_checkin/screens/event_list/event_list_screen.dart';
+import 'package:qr_checkin/screens/portrait_capture/portrait_capture_screen.dart';
 import 'package:qr_checkin/screens/search/search_screen.dart';
 
 import '../features/auth/bloc/auth_bloc.dart';
@@ -24,6 +26,7 @@ class RouteName {
   static const String eventUpdate = '/event/update/:id';
   static const String search = '/search';
   static const String eventList = '/event/list';
+  static const String eventCapture = '/event/capture';
   static const String eventDetail = '/event/:id';
 
   static const publicRoutes = [
@@ -89,6 +92,10 @@ final router = GoRouter(
         builder: (context, state) {
           return EventListScreen(searchCriteria: state.extra as SearchCriteria);
         }),
+    GoRoute(
+      path: RouteName.eventCapture,
+      builder: (context, state) => const PortraitCaptureScreen(qrEvent: null, qrImage: null),
+    ),
     GoRoute(
         path: RouteName.eventDetail,
         builder: (context, state) {

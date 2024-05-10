@@ -99,7 +99,6 @@ class SecondScreenState extends State<SecondScreen> {
                   _endTime = dateTime;
 
                   if (_endTime.isBefore(_startTime)) {
-                    log('ok');
                     _startTime = _endTime.subtract(const Duration(hours: 2));
                   }
                 });

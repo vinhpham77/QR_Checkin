@@ -56,7 +56,6 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         alignment: Alignment.center,
         children: [
           MobileScanner(
-            // fit: BoxFit.contain,
             controller: cameraController,
             onDetect: (capture) async {
               final List<Barcode> barcodes = capture.barcodes;
@@ -64,13 +63,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
               for (final barcode in barcodes) {
                 debugPrint('Barcode found! ${barcode.rawValue}');
                 if (qrImage != null) {
-                  // Show the dialog with both images
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
                       content: Column(
                         children: [
                           const Text('QR Image'),
+                          Text(barcode.rawValue ?? ''),
                           Image.memory(qrImage),
                         ],
                       ),
@@ -115,19 +114,5 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> initCameraController() async {
-    final cameras = await availableCameras();
-    final frontCamera = cameras.firstWhere(
-      (camera) => camera.lensDirection == CameraLensDirection.front,
-    );
-
-    frontCameraController = CameraController(
-      frontCamera,
-      ResolutionPreset.medium,
-    );
-
-    await frontCameraController?.initialize();
   }
 }

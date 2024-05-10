@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
@@ -84,10 +86,11 @@ class EventBloc extends Bloc<EventEvent, EventState> {
   }
 
   void _createQrCode(EventCreateQrCode event, Emitter<EventState> emit) async {
-    emit(EventQrCodeGenerating());
+    emit(EventQrCodeGenerating(isCheckIn: event.isCheckIn));
+    log('Creating QR code for event ${event.eventId}');
     Result result = await eventRepository.createQrCode(eventId: event.eventId, isCheckIn: event.isCheckIn);
     return (switch (result) {
-      Success() => emit(EventQrCodeGenerated(code: result.data)),
+      Success() => emit(EventQrCodeGenerated(code: result.data, isCheckIn: event.isCheckIn)),
       Failure() => emit(EventQrCodeGenerateFailure(message: result.message)),
     });
   }

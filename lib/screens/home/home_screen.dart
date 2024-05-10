@@ -24,8 +24,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late GoogleMapController mapController;
-  bool serviceEnabled = false;
   late int _selectedIndex;
   late final theme = Theme.of(context);
   final _pageController = PageController();
@@ -64,8 +62,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text('Đã đăng ký'),
               ),
               Container(),
-              const Center(
-                child: Text('Yêu thích'),
+              Center(
+                child: FilledButton(onPressed:
+                () {
+                  context.push(RouteName.eventCapture);
+                }, child: Text('Chụp'))
               ),
               Center(
                 child: QrImageView(

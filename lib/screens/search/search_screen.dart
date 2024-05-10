@@ -198,7 +198,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
                     return DropdownMenu<CategoryDto>(
                       requestFocusOnTap: true,
-                      width: 180,
+                      width: 170,
                       label: const Text('Danh mục'),
                       onSelected: (CategoryDto? value) {
                         if (value != null) {

@@ -66,7 +66,11 @@ class EventDto {
       backgroundUrl: json['backgroundUrl'],
       description: json['description'],
       slots: json['slots'],
-      ticketTypes: json['ticketTypes'] != null ? (json['ticketTypes'] as List).map((e) => TicketTypeDto.fromJson(e)).toList() : [],
+      ticketTypes: json['ticketTypes'] != null
+          ? (json['ticketTypes'] as List)
+              .map((e) => TicketTypeDto.fromJson(e))
+              .toList()
+          : [],
       startAt: DateTime.parse(json['startAt']),
       endAt: DateTime.parse(json['endAt']),
       location: json['location'],
@@ -77,14 +81,19 @@ class EventDto {
       regisRequired: json['regisRequired'],
       approvalRequired: json['approvalRequired'],
       captureRequired: json['captureRequired'],
-      categories: json['categories'] != null ? (json['categories'] as List).map((e) => CategoryDto.fromJson(e)).toList() : [],
+      categories: json['categories'] != null
+          ? (json['categories'] as List)
+              .map((e) => CategoryDto.fromJson(e))
+              .toList()
+          : [],
       checkinQrCode: json['checkinQrCode'],
       checkoutQrCode: json['checkoutQrCode'],
       createdAt: DateTime.parse(json['createdAt']),
       createdBy: json['createdBy'],
       updatedAt: DateTime.parse(json['updatedAt']),
       updatedBy: json['updatedBy'],
-      deletedAt: json['deletedAt'] != null ? DateTime.parse(json['deletedAt']) : null,
+      deletedAt:
+          json['deletedAt'] != null ? DateTime.parse(json['deletedAt']) : null,
       deletedBy: json['deletedBy'],
     );
   }
@@ -98,7 +107,9 @@ class EventDto {
       location: '',
       isTicketSeller: false,
       startAt: DateTime.now(),
-      endAt: DateTime.now(),
+      endAt: DateTime.now().add(
+        const Duration(hours: 2),
+      ),
       latitude: 0,
       longitude: 0,
       checkinQrCode: '',

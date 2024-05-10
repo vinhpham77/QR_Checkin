@@ -28,7 +28,7 @@ String timeLast(DateTime from, DateTime to) {
   if (from.day == to.day && from.month == to.month && from.year == to.year) {
     return '${from.hour}:${from.minute} - ${to.hour}:${to.minute}, ${from.day} tháng ${from.month}, ${from.year}';
   } else {
-    return '${from.hour}:${from.minute}, ${from.day} tháng ${from.month}, ${from.year} - ${to.hour}:${to.minute}, ${to.day} tháng ${to.month}, ${to.year}';
+    return '${from.hour}:${from.minute}, ${from.day}/${from.month}/${from.year} - ${to.hour}:${to.minute}, ${to.day}/${to.month}/${to.year}';
   }
 }
 
@@ -61,7 +61,6 @@ void setUserInfo(String jwt) {
 }
 
 String formatPrice(double price) {
-  // locale vn
   final formatter = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
   return formatter.format(price);
 }

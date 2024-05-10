@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -7,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart' as html;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/features/ticket/data/ticket_api_client.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+
 import '../../config/http_client.dart';
 import '../../config/router.dart';
 import '../../config/theme.dart';
@@ -34,12 +37,21 @@ class EventDetailScreen extends StatefulWidget {
 class _EventDetailScreenState extends State<EventDetailScreen> {
   late GoogleMapController mapController;
   EventDto event = EventDto.empty();
-  final ticketBloc = TicketBloc(TicketRepository(TicketApiClient(dio)), TicketTypeRepository(TicketTypeApiClient(dio)));
+  String code = '';
+  final ticketBloc = TicketBloc(TicketRepository(TicketApiClient(dio)),
+      TicketTypeRepository(TicketTypeApiClient(dio)));
   List<TicketTypeDto> ticketTypes = [];
+  bool isGenerating = false;
+  int counter = 0;
+  bool isFirst = false;
+  late StreamController<int> countdownController;
+  Timer? countdownTimer;
+  bool absorb = false;
 
   @override
   void initState() {
     super.initState();
+    countdownController = StreamController<int>.broadcast();
     context.read<EventBloc>().add(EventFetchOne(id: widget.eventId));
   }
 
@@ -74,6 +86,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 backgroundColor: AppColors.red,
               ),
             );
+          } else if (state is EventQrCodeGenerateFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.red,
+              ),
+            );
           }
         },
         child: BlocBuilder<EventBloc, EventState>(
@@ -82,6 +101,37 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               event = state.event;
             } else if (state is EventFetchOneFailure) {
               return Center(child: Text(state.message));
+            } else if (state is EventQrCodeGenerated) {
+              code = state.code;
+              isGenerating = false;
+              startCountdown(isCheckIn: state.isCheckIn);
+              return Stack(
+                children: [
+                  _buildEventDetail(event: event),
+                  if (absorb) _buildQrOverlay(state.isCheckIn),
+                ],
+              );
+            } else if (state is EventQrCodeGenerating) {
+              isGenerating = true;
+              if (countdownTimer != null) {
+                countdownTimer?.cancel();
+                countdownTimer = null;
+                counter = 0;
+              }
+              return Stack(
+                children: [
+                  _buildEventDetail(event: event),
+                  if (absorb) _buildQrOverlay(state.isCheckIn)
+                ],
+              );
+            } else if (state is EventQrCodeGenerateFailure) {
+              isGenerating = false;
+              code = '';
+              if (countdownTimer != null) {
+                countdownTimer?.cancel();
+                countdownTimer = null;
+                counter = 0;
+              }
             }
 
             return _buildEventDetail(event: event);
@@ -120,18 +170,21 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   value: 'report',
                   child: Text('Báo cáo'),
                 ),
-                const PopupMenuItem<String>(
-                  value: 'qr',
-                  child: Text('Xem mã QR'),
-                ),
+                if (!event.isTicketSeller)
+                  const PopupMenuItem<String>(
+                    value: 'qr',
+                    child: Text('Xem mã QR'),
+                  ),
               ],
             ),
         ],
       ),
-      bottomNavigationBar: event.isTicketSeller ? null : Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          color: AppColors.black,
-          child: _buildBottomWidget(event: event)),
+      bottomNavigationBar: event.isTicketSeller
+          ? null
+          : Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: AppColors.black,
+              child: _buildBottomWidget(event: event)),
       body: SingleChildScrollViewWithColumn(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -256,7 +309,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             const SizedBox(
               height: 8,
             ),
-            if (event.isTicketSeller && event.endAt.isAfter(DateTime.now()))
+            if (event.isTicketSeller)
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
                 padding: const EdgeInsets.all(16),
@@ -278,7 +331,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     children: [
                       Container(
                           padding: const EdgeInsets.only(bottom: 4, left: 8),
-                          child: Text('Các loại vé',
+                          child: Text(
+                              'Các loại vé ${isEventActive(event) ? '(Đang mở bán)' : '(Đã kết thúc bán vé)'}',
                               style: themeData.textTheme.titleMedium!.copyWith(
                                 fontWeight: FontWeight.w500,
                                 fontSize: 18,
@@ -323,22 +377,41 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               children: ticketTypes
                                   .map(
                                     (ticketType) => ListTile(
-                                  title: Text(ticketType.name),
-                                  subtitle: Text(
-                                    formatPrice(ticketType.price!),
-                                    style: const TextStyle(
-                                      color: AppColors.black,
+                                      title: Text(ticketType.name),
+                                      subtitle: Text(
+                                        formatPrice(ticketType.price!),
+                                        style: const TextStyle(
+                                          color: AppColors.black,
+                                        ),
+                                      ),
+                                      trailing: ElevatedButton(
+                                        onPressed: ticketType.quantity! <= 0
+                                            ? null
+                                            : isEventActive(event)
+                                                ? () {
+                                                    ticketBloc.add(
+                                                        TicketPurchase(
+                                                            ticketTypeId:
+                                                                ticketType.id));
+                                                  }
+                                                : () {
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                            'Sự kiện đã kết thúc'),
+                                                        backgroundColor:
+                                                            AppColors.red,
+                                                      ),
+                                                    );
+                                                  },
+                                        child: Text(ticketType.quantity! > 0
+                                            ? 'Mua vé'
+                                            : 'Hết vé'),
+                                      ),
                                     ),
-                                  ),
-                                  trailing: ElevatedButton(
-
-                                    onPressed: ticketType.quantity! <= 0 ? null : () {
-                                      ticketBloc.add(TicketPurchase(ticketTypeId: ticketType.id));
-                                    },
-                                    child: Text(ticketType.quantity! > 0 ? 'Mua vé' : 'Hết vé'),
-                                  ),
-                                ),
-                              )
+                                  )
                                   .toList(),
                             );
                           },
@@ -348,7 +421,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   ),
                 ),
               ),
-            if (event.isTicketSeller && event.endAt.isAfter(DateTime.now()))
+            if (event.isTicketSeller &&
+                event.endAt.isAfter(
+                    DateTime.now().toUtc().add(const Duration(hours: 7))))
               const SizedBox(
                 height: 8,
               ),
@@ -528,7 +603,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   backgroundColor: AppColors.red,
                 ),
                 onPressed: () {
-                  context.read<EventBloc>().add(EventRegister(eventId: event.id));
+                  context
+                      .read<EventBloc>()
+                      .add(EventRegister(eventId: event.id));
                 },
                 child: const Text(
                   'Đăng ký',
@@ -577,46 +654,34 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Mỗi mã QR được tạo ra sẽ chỉ tồn tại và hợp lệ trong vòng 30 giây'),
-              SizedBox(height: 16),
-              Row(
+              const Text(
+                  'Mỗi mã QR được tạo ra sẽ chỉ tồn tại và hợp lệ trong vòng 30 giây'),
+              const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // button create qr
                   ElevatedButton(
                     onPressed: () {
-                      var now = DateTime.now();
-
-                      if (now.isBefore(event.startAt)) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Sự kiện chưa bắt đầu'),
-                            backgroundColor: AppColors.red,
-                          ),
-                        );
-                        return;
-                      } else if (now.isAfter(event.endAt)) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Sự kiện đã kết thúc'),
-                            backgroundColor: AppColors.red,
-                          ),
-                        );
-                        return;
-                      } else {
-                        Navigator.of(context).pop();
-                      }
-                      // context.read<EventBloc>().add(EventCreateQrCode(eventId: event.id));
+                      Navigator.of(context).pop();
+                      setState(() {
+                        absorb = true;
+                      });
+                      showQrCodePatternDialog(isCheckIn: true);
                     },
                     child: const Text('Mã check in'),
                   ),
                   if (event.checkoutQrCode != null)
-                  ElevatedButton(
-                    onPressed: () {
-                      //
-                    },
-                    child: const Text('Mã check out'),
-                  ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          absorb = true;
+                        });
+                        showQrCodePatternDialog(isCheckIn: false);
+                      },
+                      child: const Text('Mã check out'),
+                    ),
                 ],
               ),
             ],
@@ -636,79 +701,142 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   // show qr code pattern dialog
   void showQrCodePatternDialog({bool isCheckIn = true}) {
-    var qrEvent = QrEvent(
-      isTicketSeller: event.isTicketSeller,
-      eventId: event.id,
-      isCheckin: isCheckIn,
-      code: '',
-    );
+    var now = DateTime.now().toUtc().add(const Duration(hours: 7));
 
-    var timer = Timer(const Duration(seconds: 30), () => {
-        context.read<EventBloc>().add(EventCreateQrCode(eventId: event.id, isCheckIn: isCheckIn))
+    if (now.isBefore(event.startAt)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sự kiện chưa bắt đầu'),
+          backgroundColor: AppColors.red,
+        ),
+      );
+      return;
+    } else if (isCheckIn && now.isAfter(event.endAt)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sự kiện đã kết thúc'),
+          backgroundColor: AppColors.red,
+        ),
+      );
+      return;
+    }
+
+    context.read<EventBloc>().add(EventCreateQrCode(
+          eventId: event.id,
+          isCheckIn: isCheckIn,
+        ));
+    startCountdown(isCheckIn: isCheckIn);
+  }
+
+  void startCountdown({bool isCheckIn = true}) {
+    counter = 30;
+
+    if (countdownTimer != null) {
+      countdownTimer?.cancel();
+    }
+
+    countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (counter == 0) {
+        counter = 30;
+        context.read<EventBloc>().add(EventCreateQrCode(
+              eventId: event.id,
+              isCheckIn: isCheckIn,
+            ));
+      } else {
+        counter--;
+      }
+      countdownController.add(counter);
     });
+  }
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
+  Widget buildCountdown() {
+    if (isGenerating) {
+      return const Text(
+        'Đang tạo mã QR...',
+        style: TextStyle(
+          color: AppColors.black,
+        ),
+      );
+    } else {
+      return StreamBuilder<int>(
+        stream: countdownController.stream,
+        initialData: counter,
+        builder: (context, snapshot) {
+          return Text(
+            '00:${snapshot.data}',
+            style: const TextStyle(
+              color: AppColors.black,
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  Widget _buildQrOverlay(bool isCheckIn) {
+    return AbsorbPointer(
+      absorbing: !absorb,
+      child: Container(
+        color: AppColors.black.withOpacity(0.4),
+        child: AlertDialog(
           title: Text(isCheckIn ? 'Mã check in' : 'Mã check out'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // button create qr
-                  ElevatedButton(
-                    onPressed: () {
-                      var now = DateTime.now();
-
-                      if (now.isBefore(event.startAt)) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Sự kiện chưa bắt đầu'),
-                            backgroundColor: AppColors.red,
-                          ),
-                        );
-                        return;
-                      } else if (now.isAfter(event.endAt)) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Sự kiện đã kết thúc'),
-                            backgroundColor: AppColors.red,
-                          ),
-                        );
-                        return;
-                      } else {
-                        Navigator.of(context).pop();
-                      }
-                      // context.read<EventBloc>().add(EventCreateQrCode(eventId: event.id));
-                    },
-                    child: const Text('Mã check in'),
+          content: SizedBox(
+            width: 360,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Mã QR sẽ tự động cập nhật sau mỗi 30 giây',
+                  style: TextStyle(
+                    color: AppColors.black,
                   ),
-                  if (event.checkoutQrCode != null)
-                  ElevatedButton(
-                    onPressed: () {
-                      //
-                    },
-                    child: const Text('Mã check out'),
-                  ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 16),
+                Center(
+                    child: isGenerating || code == ''
+                        ? const CircularProgressIndicator()
+                        : QrImageView(
+                            errorCorrectionLevel: QrErrorCorrectLevel.M,
+                            size: 200,
+                            version: 10,
+                            data: QrEvent(
+                              isTicketSeller: event.isTicketSeller,
+                              eventId: event.id,
+                              isCheckin: isCheckIn,
+                              code: code,
+                            ).toString())),
+                Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: buildCountdown()),
+              ],
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                setState(() {
+                  absorb = false;
+                });
+                countdownTimer?.cancel();
+                countdownTimer = null;
               },
               child: const Text('Đóng'),
             ),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 
+  bool isEventActive(EventDto event) => event.startAt
+      .isBefore(DateTime.now().toUtc().add(const Duration(hours: 7)));
+
+  @override
+  void dispose() {
+    if (countdownTimer != null) {
+      countdownTimer?.cancel();
+    }
+    countdownController.close();
+    super.dispose();
+  }
 }
