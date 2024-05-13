@@ -80,7 +80,7 @@ final class EventUpdateFailure extends EventState {
 }
 
 final class EventFetchSuccess extends EventState {
-  final ItemCounterDTO<EventDto> events;
+  final ItemCounterDto<EventDto> events;
   final String key;
 
   const EventFetchSuccess({required this.events, required this.key});

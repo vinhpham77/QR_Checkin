@@ -122,7 +122,7 @@ class _PortraitCaptureScreenState extends State<PortraitCaptureScreen> {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text('Chân dung'),
-                            content: Container(
+                            content: SizedBox(
                               width: 200,
                               child: Image.memory(image),
                             ),

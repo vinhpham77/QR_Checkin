@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/config/theme.dart';
 import 'package:qr_checkin/features/event/bloc/event_bloc.dart';
-import 'package:qr_checkin/features/event/dtos/item_counter.dart';
+import 'package:qr_checkin/features/item_counter.dart';
 import 'package:qr_checkin/features/event/dtos/search_criteria.dart';
 
 import '../../config/router.dart';
@@ -21,9 +21,9 @@ class _EventsScreenState extends State<EventsScreen> {
   final String newestEvent = 'Mới nhất';
   final String latestEvent = 'Vừa cập nhật';
   final String nearestEvent = 'Gần đây';
-  var newestEvents = ItemCounterDTO(0, []);
-  var latestEvents = ItemCounterDTO(0, []);
-  var nearestEvents = ItemCounterDTO(0, []);
+  var newestEvents = ItemCounterDto(0, []);
+  var latestEvents = ItemCounterDto(0, []);
+  var nearestEvents = ItemCounterDto(0, []);
   LatLng? currentLocation;
 
   @override

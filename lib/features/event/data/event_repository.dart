@@ -1,10 +1,8 @@
 import 'dart:developer';
 
-import 'package:dio/dio.dart';
-
+import '../../item_counter.dart';
 import '../../result_type.dart';
 import '../dtos/event_dto.dart';
-import '../dtos/item_counter.dart';
 import 'event_api_client.dart';
 
 class EventRepository {
@@ -42,7 +40,7 @@ class EventRepository {
     }
   }
 
-  Future<Result<ItemCounterDTO<EventDto>>> getEvents({
+  Future<Result<ItemCounterDto<EventDto>>> getEvents({
     int page = 1,
     int limit = 10,
     String? keyword,
@@ -82,9 +80,11 @@ class EventRepository {
     }
   }
 
-  Future<Result<String>> createQrCode({required int eventId, required bool isCheckIn}) async {
+  Future<Result<String>> createQrCode(
+      {required int eventId, required bool isCheckIn}) async {
     try {
-      final code = await eventApiClient.createQrCode(eventId: eventId, isCheckIn: isCheckIn);
+      final code = await eventApiClient.createQrCode(
+          eventId: eventId, isCheckIn: isCheckIn);
       return Success(code);
     } on Exception catch (e) {
       log('$e');

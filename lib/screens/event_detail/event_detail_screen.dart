@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart' as html;
+import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/features/ticket/data/ticket_api_client.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -38,8 +38,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   late GoogleMapController mapController;
   EventDto event = EventDto.empty();
   String code = '';
-  final ticketBloc = TicketBloc(TicketRepository(TicketApiClient(dio)),
-      TicketTypeRepository(TicketTypeApiClient(dio)));
+  final ticketBloc = TicketBloc(
+      ticketRepository: TicketRepository(TicketApiClient(dio)),
+      ticketTypeRepository: TicketTypeRepository(TicketTypeApiClient(dio)));
   List<TicketTypeDto> ticketTypes = [];
   bool isGenerating = false;
   int counter = 0;
@@ -151,7 +152,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               onSelected: (String value) {
                 switch (value) {
                   case 'edit':
-                    router.push(RouteName.eventUpdate, extra: event.id);
+                    context.push(RouteName.eventUpdate, extra: event.id);
                     break;
                   case 'report':
                     // context.go(Routes.eventReport(eventId: event.id));

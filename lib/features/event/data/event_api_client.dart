@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:qr_checkin/features/event/dtos/item_counter.dart';
+import 'package:qr_checkin/features/item_counter.dart';
 
 import '../dtos/event_dto.dart';
 
@@ -23,7 +23,7 @@ class EventApiClient {
     }
   }
 
-  Future<ItemCounterDTO<EventDto>> getEvents({
+  Future<ItemCounterDto<EventDto>> getEvents({
     int page = 1,
     int limit = 10,
     String? keyword,
@@ -48,7 +48,7 @@ class EventApiClient {
         'sortField': sortField,
       });
 
-      return ItemCounterDTO.fromJson(response.data, (data) => EventDto.fromJson(data));
+      return ItemCounterDto.fromJson(response.data, (data) => EventDto.fromJson(data));
     } on DioException catch (e) {
       if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
@@ -62,7 +62,6 @@ class EventApiClient {
 
   Future<EventDto> createEvent(EventDto event) async {
     try {
-      // TODO: save images
       final response = await dio.post('/events', data: event.toJson());
       return EventDto.fromJson(response.data);
     } on DioException catch (e) {

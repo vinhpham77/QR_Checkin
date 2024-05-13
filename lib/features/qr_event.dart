@@ -14,12 +14,16 @@ class QrEvent {
   });
 
   factory QrEvent.fromJson(Map<String, dynamic> json) {
-    return QrEvent(
-      isTicketSeller: json['isTicketSeller'],
-      isCheckin: json['isCheckin'],
-      eventId: json['eventId'],
-      code: json['code'],
-    );
+    try {
+      return QrEvent(
+        isTicketSeller: json['isTicketSeller'],
+        isCheckin: json['isCheckin'],
+        eventId: json['eventId'],
+        code: json['code'],
+      );
+    } catch (e) {
+      throw Exception();
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -38,6 +42,10 @@ class QrEvent {
 
   factory QrEvent.fromQrCode(String data) {
     Map<String, dynamic> jsonMap = jsonDecode(data);
-    return QrEvent.fromJson(jsonMap);
+    try {
+      return QrEvent.fromJson(jsonMap);
+    } catch (e) {
+      throw Exception('Mã QR không hợp lệ');
+    }
   }
 }

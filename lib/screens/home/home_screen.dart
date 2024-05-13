@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/config/theme.dart';
 import 'package:qr_checkin/features/qr_event.dart';
 import 'package:qr_checkin/screens/events/events_screen.dart';
+import 'package:qr_checkin/screens/history/history_screen.dart';
 import 'package:qr_checkin/utils/theme_ext.dart';
 import 'package:qr_checkin/widgets/main_qr_button.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -29,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final _pageController = PageController();
   late final List<BottomNavigationBarItem> menuItems = [
     _getItem(Icons.home_outlined, Icons.home, 'Trang chủ', theme),
-    _getItem(Icons.event_seat_outlined, Icons.event_seat, 'Đã đăng ký', theme),
+    _getItem(Icons.confirmation_num_outlined, Icons.confirmation_num, 'Lịch sử', theme),
     BottomNavigationBarItem(icon: Container(), label: ''),
     _getItem(Icons.edit_document, Icons.favorite, 'Yêu thích', theme),
     _getItem(Icons.person_outline, Icons.person, 'Hồ sơ', theme)
@@ -58,15 +59,13 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // TODO: Prevent the page from being rebuilt when switching between tabs
               const EventsScreen(),
-              const Center(
-                child: Text('Đã đăng ký'),
-              ),
+              const HistoryScreen(),
               Container(),
               Center(
                 child: FilledButton(onPressed:
                 () {
                   context.push(RouteName.eventCapture);
-                }, child: Text('Chụp'))
+                }, child: const Text('Chụp'))
               ),
               Center(
                 child: QrImageView(

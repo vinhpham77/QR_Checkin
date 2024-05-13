@@ -7,7 +7,7 @@ import 'package:flutter/cupertino.dart';
 import '../../result_type.dart';
 import '../data/event_repository.dart';
 import '../dtos/event_dto.dart';
-import '../dtos/item_counter.dart';
+import '../../item_counter.dart';
 
 part 'event_state.dart';
 

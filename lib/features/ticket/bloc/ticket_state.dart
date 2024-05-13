@@ -46,3 +46,36 @@ final class TicketPurchaseFailure extends TicketState {
   @override
   List<Object> get props => [message];
 }
+
+final class TicketCheckInSuccess extends TicketState {
+}
+
+final class TicketCheckInFailure extends TicketState {
+  final String message;
+
+  const TicketCheckInFailure(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+final class TicketDetailFetching extends TicketState {
+}
+
+final class TicketDetailFetchSuccess extends TicketState {
+  final ItemCounterDto<TicketDetailDto> ticketDetails;
+
+  const TicketDetailFetchSuccess({required this.ticketDetails});
+
+  @override
+  List<Object> get props => [ticketDetails];
+}
+
+final class TicketDetailFetchFailure extends TicketState {
+  final String message;
+
+  const TicketDetailFetchFailure(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
