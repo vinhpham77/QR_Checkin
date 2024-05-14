@@ -7,10 +7,8 @@ import 'package:qr_checkin/config/theme.dart';
 import 'package:qr_checkin/utils/data_utils.dart';
 import 'package:qr_checkin/utils/theme_ext.dart';
 
-import '../../config/http_client.dart';
 import '../../config/router.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
-import '../../features/auth/data/auth_repository.dart';
 import '../../widgets/single_child_scroll_view_with_column.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -230,7 +228,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 context.go(RouteName.register);
               },
               child: Text('Chưa có tài khoản? Đăng ký ngay!',
-                  textAlign: TextAlign.center, style: context.text.bodyMedium!.copyWith(
+                  textAlign: TextAlign.center,
+                  style: context.text.bodyMedium!.copyWith(
                     color: context.color.primary,
                     fontWeight: FontWeight.w400,
                   )),

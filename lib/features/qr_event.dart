@@ -37,7 +37,7 @@ class QrEvent {
 
   @override
   String toString() {
-    return toJson().toString();
+    return jsonEncode(toJson());
   }
 
   factory QrEvent.fromQrCode(String data) {

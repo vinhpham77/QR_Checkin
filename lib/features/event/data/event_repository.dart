@@ -1,4 +1,9 @@
 import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:google_maps_flutter_platform_interface/src/types/location.dart';
+import 'package:qr_checkin/features/qr_event.dart';
 
 import '../../item_counter.dart';
 import '../../result_type.dart';
@@ -86,6 +91,26 @@ class EventRepository {
       final code = await eventApiClient.createQrCode(
           eventId: eventId, isCheckIn: isCheckIn);
       return Success(code);
+    } on Exception catch (e) {
+      log('$e');
+      return Failure.fromException(e);
+    }
+  }
+
+  Future<Result<EventDto>> checkRegistration(int eventId) async {
+    try {
+      final eventDto = await eventApiClient.checkRegistration(eventId);
+      return Success(eventDto);
+    } on Exception catch (e) {
+      log('$e');
+      return Failure.fromException(e);
+    }
+  }
+
+  Future<Result<bool>> check({required QrEvent qrEvent, required Uint8List qrImage, required bool isCaptureRequired, File? portraitFile, required LatLng location}) async {
+    try {
+      await (qrEvent.isCheckin ? eventApiClient.checkIn(qrEvent, qrImage, isCaptureRequired, portraitFile, location) : eventApiClient.checkOut(qrEvent, qrImage, isCaptureRequired, portraitFile, location));
+      return Success(qrEvent.isCheckin);
     } on Exception catch (e) {
       log('$e');
       return Failure.fromException(e);

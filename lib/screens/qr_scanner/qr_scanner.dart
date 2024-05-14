@@ -1,10 +1,14 @@
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:qr_checkin/config/router.dart';
 import 'package:qr_checkin/features/ticket/data/ticket_api_client.dart';
 import 'package:qr_checkin/utils/qr_border_painter.dart';
 
@@ -15,6 +19,7 @@ import '../../features/ticket/bloc/ticket_bloc.dart';
 import '../../features/ticket/data/ticket_repository.dart';
 import '../../features/ticket/data/ticket_type_api_client.dart';
 import '../../features/ticket/data/ticket_type_repository.dart';
+import '../../widgets/location_provider.dart';
 
 class QRScannerScreen extends StatefulWidget with WidgetsBindingObserver {
   const QRScannerScreen({super.key});
@@ -28,6 +33,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   CameraController? frontCameraController;
   QrEvent? qrEvent;
   Uint8List? img;
+  LatLng? currentLocation;
   late double screenWidth = MediaQuery.of(context).size.width;
   MobileScannerController cameraController = MobileScannerController(
     formats: [BarcodeFormat.qrCode],
@@ -41,6 +47,13 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    var newCurrentLocation = LocationProvider.of(context)?.currentLocation;
+    currentLocation ??= newCurrentLocation;
   }
 
   @override
@@ -72,15 +85,38 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           create: (context) => ticketBloc,
           child: BlocListener<EventBloc, EventState>(
             listener: (context, state) {
-              if (state is EventFetchOneSuccess) {
+              if (state is EventRegistrationCheckSuccess) {
                 if (qrEvent != null) {
                   if (qrEvent!.isTicketSeller) {
                     ticketBloc.add(TicketCheckIn(
                       code: qrEvent!.code,
                       eventId: qrEvent!.eventId,
                     ));
-                  } else if (qrEvent!.isCheckin) {
-
+                  } else if (state.eventDto.regisRequired) {
+                    if (state.eventDto.isRegistered) {
+                      if (state.eventDto.captureRequired) {
+                        context.push(RouteName.eventCapture, extra: {
+                          'qrEvent': qrEvent,
+                          'qrImage': img,
+                        });
+                      } else {}
+                    } else {
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Bạn chưa đăng ký sự kiện này'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  } else if (state.eventDto.captureRequired) {
+                    context.push(RouteName.eventCapture, extra: {
+                      'qrEvent': qrEvent,
+                      'qrImage': img,
+                    });
+                  } else {
+                    context.read<EventBloc>().add(
+                        EventCheck(qrEvent: qrEvent!, qrImg: img!, isCaptureRequired: false, portraitImage: null, location: currentLocation!));
                   }
                 }
               }
@@ -95,6 +131,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                       backgroundColor: Colors.green,
                     ),
                   );
+                  Navigator.of(context).pop();
                 } else if (state is TicketCheckInFailure) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -103,6 +140,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                       backgroundColor: Colors.red,
                     ),
                   );
+                  Navigator.of(context).pop();
                 }
               },
               child: Stack(
@@ -118,45 +156,70 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text('Mã QR'),
-                              content: Column(
-                                children: [
-                                  Image.memory(img!),
-                                  const SizedBox(height: 8),
-                                  const CircularProgressIndicator(),
-                                  const Text('Đang xử lý...')
-                                ],
+                              title: Text('Mã QR'),
+                              content: SizedBox(
+                                width: 360,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Image.memory(img!),
+                                    const SizedBox(height: 16),
+                                    const CircularProgressIndicator(),
+                                    const SizedBox(height: 8),
+                                    const Text('Đang xử lý...')
+                                  ],
+                                ),
                               ),
                             ),
                           );
+
+                          cameraController.stop();
+
                           if (barcode.rawValue != null) {
                             try {
+                              log('${barcode.rawValue}');
                               qrEvent =
                                   QrEvent.fromQrCode(barcode.rawValue ?? '');
-                              context
-                                  .read<EventBloc>()
-                                  .add(EventFetchOne(id: qrEvent!.eventId));
+                              context.read<EventBloc>().add(
+                                  EventRegistrationCheck(
+                                      eventId: qrEvent!.eventId));
                             } catch (e) {
+                              log('$e');
                               Navigator.of(context).pop();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Mã QR không hợp lệ'),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                        title: const Text('Lỗi'),
+                                        content: Column(children: [
+                                          const Text('Mã QR không hợp lệ'),
+                                          FilledButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                                cameraController.start();
+                                              },
+                                              child: const Text('Thử lại'))
+                                        ]),
+                                      ));
                             }
                           } else {
                             Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Mã QR không hợp lệ'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
+                            showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                      title: const Text('Lỗi'),
+                                      content: Column(children: [
+                                        const Text('Mã QR không hợp lệ'),
+                                        FilledButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                              cameraController.start();
+                                            },
+                                            child: const Text('Thử lại'))
+                                      ]),
+                                    ));
                           }
                         }
 
-                        cameraController.stop();
                         break;
                       }
                     },

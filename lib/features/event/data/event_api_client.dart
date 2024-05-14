@@ -1,5 +1,11 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/features/item_counter.dart';
+import 'package:qr_checkin/features/qr_event.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../dtos/event_dto.dart';
 
@@ -48,7 +54,8 @@ class EventApiClient {
         'sortField': sortField,
       });
 
-      return ItemCounterDto.fromJson(response.data, (data) => EventDto.fromJson(data));
+      return ItemCounterDto.fromJson(
+          response.data, (data) => EventDto.fromJson(data));
     } on DioException catch (e) {
       if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);
@@ -106,7 +113,8 @@ class EventApiClient {
     }
   }
 
-  Future<String> createQrCode({required int eventId, required bool isCheckIn}) async {
+  Future<String> createQrCode(
+      {required int eventId, required bool isCheckIn}) async {
     try {
       final response = await dio.post('/events/generate-qr', data: {
         'eventId': eventId,
@@ -122,5 +130,65 @@ class EventApiClient {
     } catch (e) {
       throw Exception(e);
     }
+  }
+
+  Future<EventDto> checkRegistration(int eventId) async {
+    try {
+      var response = await dio.get('/registrations/$eventId/check');
+      return EventDto.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        throw Exception(e.response!.data['message']);
+      } else {
+        throw Exception(e.message);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<bool> checkIn(QrEvent qrEvent, Uint8List qrImage,
+      bool isCaptureRequired, File? portraitFile, LatLng location) async {
+    try {
+      Directory tempDir = await getTemporaryDirectory();
+      String tempPath = tempDir.path;
+      File qrImgFile = File('$tempPath/qr_code.png');
+      await qrImgFile.writeAsBytes(qrImage);
+
+      var formData = FormData();
+
+      formData.files.add(MapEntry(
+          'qrImage', MultipartFile.fromFileSync(qrImgFile.path)));
+      if (isCaptureRequired && portraitFile != null) {
+        formData.files.add(MapEntry('portraitImage',
+            MultipartFile.fromFileSync(portraitFile.path)));
+      }
+      formData.fields.add(MapEntry('code', qrEvent.code));
+
+      dio.options.headers['latitude'] = location.latitude;
+      dio.options.headers['longitude'] = location.longitude;
+
+      await dio.post('/attendances/${qrEvent.eventId}/check-in',
+          data: formData);
+
+      // Xóa tệp sau khi sử dụng
+      await qrImgFile.delete();
+      await portraitFile?.delete();
+
+      return qrEvent.isCheckin;
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        throw Exception(e.response!.data['message']);
+      } else {
+        throw Exception(e.message);
+      }
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<bool> checkOut(QrEvent qrEvent, Uint8List qrImage,
+      bool isCaptureRequired, File? portraitFile, LatLng location) {
+    throw UnimplementedError();
   }
 }

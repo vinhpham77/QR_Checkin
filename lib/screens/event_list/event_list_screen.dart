@@ -86,26 +86,28 @@ class _EventListScreenState extends State<EventListScreen> {
             }
 
             return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    child: GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.9,
-                        mainAxisSpacing: 10.0,
-                        crossAxisSpacing: 10.0,
+                if (_events.isNotEmpty)
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      child: GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.9,
+                          mainAxisSpacing: 10.0,
+                          crossAxisSpacing: 10.0,
+                        ),
+                        controller: _scrollController,
+                        itemCount: _events.length,
+                        itemBuilder: (context, index) {
+                          return EventItem(event: _events[index]);
+                        },
                       ),
-                      controller: _scrollController,
-                      itemCount: _events.length,
-                      itemBuilder: (context, index) {
-                        return EventItem(event: _events[index]);
-                      },
                     ),
                   ),
-                ),
                 if (isLoading)
                   Container(
                     color: AppColors.white.withOpacity(0.3),

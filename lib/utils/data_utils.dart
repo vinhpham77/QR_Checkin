@@ -10,7 +10,7 @@ DateTime? tryParseDateTime(String? formattedString) {
   }
 
   try {
-    return DateTime.tryParse(formattedString);
+    return DateTime.tryParse(formattedString)?.toLocal();
   } on Exception catch (_) {
     return null;
   }
@@ -50,6 +50,8 @@ String decodeBase64(String str) {
 
   return utf8.decode(base64Url.decode(output));
 }
+
+DateTime get now => DateTime.now();
 
 void setUserInfo(String jwt) {
   final jwtPayload = jwt.split('.')[1];

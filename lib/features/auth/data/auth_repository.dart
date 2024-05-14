@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:qr_checkin/utils/data_utils.dart';
 
-import '../../../config/user_info.dart';
 import '../../result_type.dart';
 import '../dtos/login_dto.dart';
 import '../dtos/register_dto.dart';
@@ -63,7 +61,8 @@ class AuthRepository {
 
   Future<Result<String>> getAccessToken() async {
     try {
-      final token = await authLocalDataSource.getToken(AuthDataConstants.accessToken);
+      final token =
+          await authLocalDataSource.getToken(AuthDataConstants.accessToken);
 
       if (token == null) {
         return Failure('No access token found');
@@ -80,7 +79,8 @@ class AuthRepository {
 
   Future<Result<String?>> getRefreshToken() async {
     try {
-      final token = await authLocalDataSource.getToken(AuthDataConstants.refreshToken);
+      final token =
+          await authLocalDataSource.getToken(AuthDataConstants.refreshToken);
 
       if (token == null) {
         return Failure('No refresh token found');
@@ -123,7 +123,8 @@ class AuthRepository {
   // TODO: Implement logout
   Future<Result<void>> logout() async {
     try {
-      final token = await authLocalDataSource.getToken(AuthDataConstants.refreshToken);
+      final token =
+          await authLocalDataSource.getToken(AuthDataConstants.refreshToken);
 
       if (token != null) {
         await authApiClient.logout(token);

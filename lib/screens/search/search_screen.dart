@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/features/event/dtos/order_filter_dto.dart';
 import 'package:qr_checkin/features/event/dtos/search_criteria.dart';
-import 'package:qr_checkin/utils/theme_ext.dart';
 
 import '../../config/http_client.dart';
 import '../../config/router.dart';
@@ -13,7 +13,6 @@ import '../../features/category/data/category_repository.dart';
 import '../../features/category/dtos/category_dto.dart';
 
 class SearchScreen extends StatefulWidget {
-
   const SearchScreen({super.key});
 
   @override
@@ -226,19 +225,22 @@ class _SearchScreenState extends State<SearchScreen> {
             const SizedBox(height: 18),
             FilledButton(
               onPressed: () {
-                router.push(RouteName.eventList, extra: SearchCriteria(
-                  title: 'Kết quả tìm kiếm',
-                  keyword: _keywordController.text,
-                  fields: _selectedFilters.map((e) => e['value']!).toList(),
-                  categoryId: selectedCategory?.id,
-                  sortField: _selectedOrder.value,
-                  isAsc: _selectedOrder.isAsc,
-                ));
+                context.push(RouteName.eventList,
+                    extra: SearchCriteria(
+                      title: 'Kết quả tìm kiếm',
+                      keyword: _keywordController.text,
+                      fields: _selectedFilters.map((e) => e['value']!).toList(),
+                      categoryId: selectedCategory?.id,
+                      sortField: _selectedOrder.value,
+                      isAsc: _selectedOrder.isAsc,
+                    ));
               },
               style: FilledButton.styleFrom(
                 minimumSize: const Size(double.infinity, 48),
               ),
-              child: Text('Tìm kiếm', style: themeData.textTheme.labelLarge?.copyWith(color: Colors.white)),
+              child: Text('Tìm kiếm',
+                  style: themeData.textTheme.labelLarge
+                      ?.copyWith(color: Colors.white)),
             ),
           ]),
         ),

@@ -27,9 +27,9 @@ class TicketApiClient {
     }
   }
 
-  Future<void> checkIn({required String code, required String eventId}) async {
+  Future<void> checkIn({required String code, required int eventId}) async {
     try {
-      await dio.post(
+      await dio.put(
         '/tickets/check-in',
         data: {
           'code': code,

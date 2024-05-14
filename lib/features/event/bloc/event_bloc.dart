@@ -1,8 +1,11 @@
-import 'dart:developer';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:google_maps_flutter_platform_interface/src/types/location.dart';
+import 'package:qr_checkin/features/qr_event.dart';
 
 import '../../result_type.dart';
 import '../data/event_repository.dart';
@@ -24,6 +27,8 @@ class EventBloc extends Bloc<EventEvent, EventState> {
     on<EventFetch>(_fetchEvents);
     on<EventRegister>(_registerEvent);
     on<EventCreateQrCode>(_createQrCode);
+    on<EventRegistrationCheck>(_checkRegistration);
+    on<EventCheck>(_checkEvent);
   }
 
   void _prefillEvent(EventPrefilled event, Emitter<EventState> emit) {
@@ -87,11 +92,28 @@ class EventBloc extends Bloc<EventEvent, EventState> {
 
   void _createQrCode(EventCreateQrCode event, Emitter<EventState> emit) async {
     emit(EventQrCodeGenerating(isCheckIn: event.isCheckIn));
-    log('Creating QR code for event ${event.eventId}');
     Result result = await eventRepository.createQrCode(eventId: event.eventId, isCheckIn: event.isCheckIn);
     return (switch (result) {
       Success() => emit(EventQrCodeGenerated(code: result.data, isCheckIn: event.isCheckIn)),
       Failure() => emit(EventQrCodeGenerateFailure(message: result.message)),
+    });
+  }
+
+  void _checkRegistration(EventRegistrationCheck event, Emitter<EventState> emit) async {
+    emit(EventRegistrationChecking());
+    Result result = await eventRepository.checkRegistration(event.eventId);
+    return (switch (result) {
+      Success() => emit(EventRegistrationCheckSuccess(eventDto: result.data)),
+      Failure() => emit(EventRegistrationCheckFailure(message: result.message)),
+    });
+  }
+
+  void _checkEvent(EventCheck event, Emitter<EventState> emit) async {
+    emit(EventCheckLoading());
+    Result result = await eventRepository.check(qrEvent: event.qrEvent, qrImage: event.qrImg, isCaptureRequired: event.isCaptureRequired, portraitFile: event.portraitImage, location: event.location);
+    return (switch (result) {
+      Success() => emit(EventCheckSuccess(isCheckIn: result.data)),
+      Failure() => emit(EventCheckFailure(message: result.message)),
     });
   }
 }

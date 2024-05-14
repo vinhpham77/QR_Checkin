@@ -92,3 +92,30 @@ final class EventCreateQrCode extends EventEvent {
   @override
   List<Object?> get props => [eventId, isCheckIn];
 }
+
+final class EventRegistrationCheck extends EventEvent {
+  final int eventId;
+
+  const EventRegistrationCheck({required this.eventId});
+
+  @override
+  List<Object?> get props => [eventId];
+}
+
+final class EventCheck extends EventEvent {
+  final QrEvent qrEvent;
+  final Uint8List qrImg;
+  final bool isCaptureRequired;
+  final File? portraitImage;
+  final LatLng location;
+
+  const EventCheck({
+    required this.qrEvent,
+    required this.qrImg,
+    required this.isCaptureRequired,
+    this.portraitImage, required  this.location,
+  });
+
+  @override
+  List<Object?> get props => [qrEvent, qrImg, isCaptureRequired, portraitImage, location];
+}

@@ -151,3 +151,45 @@ final class EventQrCodeGenerateFailure extends EventState {
   @override
   List<Object?> get props => [message];
 }
+
+final class EventRegistrationCheckSuccess extends EventState {
+  final EventDto eventDto;
+
+  const EventRegistrationCheckSuccess({required this.eventDto});
+
+  @override
+  List<Object?> get props => [eventDto];
+}
+
+final class EventRegistrationCheckFailure extends EventState {
+  final String message;
+
+  const EventRegistrationCheckFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+final class EventRegistrationChecking extends EventState {
+}
+
+final class EventCheckSuccess extends EventState {
+  final bool isCheckIn;
+
+  const EventCheckSuccess({required this.isCheckIn});
+
+  @override
+  List<Object?> get props => [isCheckIn];
+}
+
+final class EventCheckFailure extends EventState {
+  final String message;
+
+  const EventCheckFailure({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+final class EventCheckLoading extends EventState {
+}

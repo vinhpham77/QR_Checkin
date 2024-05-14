@@ -53,29 +53,44 @@ class _CategoryDropdownState extends State<CategoryDropdown> {
       );
     }).toList();
 
-    return Container(
-      transform: Matrix4.translationValues(0, 0, 0),
-      child: DropdownMenu<CategoryDto>(
-        controller: categoryController,
-        menuHeight: 320,
-        enableFilter: true,
-        initialSelection: null,
-        hintText: widget.label,
-        dropdownMenuEntries: categoryEntries,
-        inputDecorationTheme: themeData.inputDecorationTheme.copyWith(
-          fillColor: AppColors.white,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 0),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppSizes.fieldRadius)
+    return DropdownMenu<CategoryDto>(
+      controller: categoryController,
+      menuHeight: 320,
+      enableFilter: true,
+      initialSelection: null,
+      hintText: widget.label,
+      dropdownMenuEntries: categoryEntries,
+      inputDecorationTheme: themeData.inputDecorationTheme.copyWith(
+        fillColor: AppColors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 0),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSizes.fieldRadius),
+          borderSide: const BorderSide(
+            color: AppColors.transparent,
+            width: 1,
+            style: BorderStyle.none
           ),
         ),
-        onSelected: (CategoryDto? category) {
-          widget.onSelected(category!);
-          setState(() {
-            categoryController.text = '';
-          });
-        },
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSizes.fieldRadius),
+          borderSide: const BorderSide(
+            color: AppColors.transparent,
+            width: 1,
+            style: BorderStyle.none
+          ),
+        ),
+        outlineBorder: const BorderSide(
+            color: AppColors.transparent,
+            width: 1,
+            style: BorderStyle.none
+        ),
       ),
+      onSelected: (CategoryDto? category) {
+        widget.onSelected(category!);
+        setState(() {
+          categoryController.text = '';
+        });
+      },
     );
   }
 }

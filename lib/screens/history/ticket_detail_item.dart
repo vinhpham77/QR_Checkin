@@ -97,7 +97,7 @@ class _TicketDetailItemState extends State<TicketDetailItem> {
                       ),
                     ),
                     Text(
-                      widget.ticketDetail.checkInAt == null ? 'Chưa sử dụng' : 'Check in lúc:${formatDateTime(widget.ticketDetail.checkInAt!)}',
+                      widget.ticketDetail.checkInAt == null ? 'Chưa sử dụng' : 'Check in: ${formatDateTime(widget.ticketDetail.checkInAt!)}',
                       style: const TextStyle(
                         fontSize: 14,
                       ),
@@ -132,7 +132,16 @@ class _TicketDetailItemState extends State<TicketDetailItem> {
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 2),
+                            Text(
+                              widget.ticketDetail.eventName,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: themeData.primaryColor,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
                             QrImageView(
                                 errorCorrectionLevel: QrErrorCorrectLevel.M,
                                 size: 240,
@@ -143,7 +152,7 @@ class _TicketDetailItemState extends State<TicketDetailItem> {
                                   isCheckin: true,
                                   code: widget.ticketDetail.qrCode,
                                 ).toString()),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                           ],
                         ),
                       ),

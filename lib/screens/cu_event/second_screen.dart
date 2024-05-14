@@ -28,7 +28,9 @@ class SecondScreenState extends State<SecondScreen> {
   final _locationFocusNode = FocusNode();
   final _radiusKey = GlobalKey<FormFieldState>();
   final _radiusFocusNode = FocusNode();
-  final formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
+
+  bool get isValidForm => _formKey.currentState!.validate();
 
   String get location => _locationController.text;
   DateTime get startAt => _startTime;
@@ -62,7 +64,7 @@ class SecondScreenState extends State<SecondScreen> {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: formKey,
+      key: _formKey,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Thời gian bắt đầu',
             style: themeData.textTheme.bodyMedium!),

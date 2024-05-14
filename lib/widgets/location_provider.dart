@@ -4,8 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class LocationProvider extends InheritedWidget {
   final LatLng currentLocation;
 
-  LocationProvider({required this.currentLocation, required Widget child})
-      : super(child: child);
+  const LocationProvider({super.key, required this.currentLocation, required super.child});
 
   @override
   bool updateShouldNotify(LocationProvider oldWidget) {

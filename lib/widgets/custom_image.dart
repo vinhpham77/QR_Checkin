@@ -17,6 +17,7 @@ class CustomImage extends StatelessWidget {
     return Image.network(
       imageUrl ?? '',
       height: size,
+      width: size * 16/9,
       fit: BoxFit.cover,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) {

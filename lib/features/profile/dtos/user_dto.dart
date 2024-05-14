@@ -1,3 +1,5 @@
+import 'package:qr_checkin/utils/data_utils.dart';
+
 class UserDto {
   String username;
   String email;
@@ -32,11 +34,9 @@ class UserDto {
       sex: json['sex'],
       status: json['status'],
       avatarUrl: json['avatarUrl'],
-      birthdate:
-          json['birthdate'] != null ? DateTime.parse(json['birthdate']) : null,
+      birthdate: tryParseDateTime(json['birthdate']),
       createdAt: DateTime.parse(json['createdAt']),
-      updatedAt:
-          json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
+      updatedAt: tryParseDateTime(json['updatedAt']),
     );
   }
 
@@ -60,7 +60,7 @@ class UserDto {
       'email': email,
       'fullName': fullName,
       'role': role,
-      'birthDate': birthdate?.toIso8601String(),
+      'birthDate': birthdate?.toUtc().toIso8601String(),
       'avatarUrl': avatarUrl,
       'sex': sex,
     };

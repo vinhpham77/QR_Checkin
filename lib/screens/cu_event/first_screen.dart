@@ -41,7 +41,9 @@ class FirstScreenState extends State<FirstScreen> {
   late ImageBloc _imageBloc;
   final _nameKey = GlobalKey<FormFieldState>();
   final _nameFocusNode = FocusNode();
-  final formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
+
+  bool get isValidForm => _formKey.currentState!.validate();
 
   String get name => _nameController.text;
   Future<String> get description => _descriptionController.getText();
@@ -70,7 +72,7 @@ class FirstScreenState extends State<FirstScreen> {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: formKey,
+      key: _formKey,
       child: MultiBlocProvider(
         providers: [
           BlocProvider.value(value: _categoryBloc),

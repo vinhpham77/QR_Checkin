@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:qr_checkin/utils/data_utils.dart';
 
 import '../../result_type.dart';
 import '../data/auth_repository.dart';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/config/router.dart';
 
 import '../../config/theme.dart';
@@ -26,7 +27,7 @@ class Event extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {
-        router.push(RouteName.eventDetail, extra: eventId);
+        context.push(RouteName.eventDetail, extra: eventId);
       },
       child: Container(
         margin: const EdgeInsets.all(4),
@@ -97,7 +98,7 @@ class Event extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 6),
-                Container(
+                SizedBox(
                   width: 200,
                   child: Text(
                     title,

@@ -23,7 +23,9 @@ class ThirdScreenState extends State<ThirdScreen> {
   late String checkinQrCode;
   late String? checkoutQrCode;
   late int? slots;
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
+
+  bool get isValidForm => _formKey.currentState!.validate();
   late final TextEditingController _slotsController;
   TextEditingController ticketNameController = TextEditingController();
   TextEditingController ticketDescriptionController = TextEditingController();
@@ -48,7 +50,7 @@ class ThirdScreenState extends State<ThirdScreen> {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: formKey,
+      key: _formKey,
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

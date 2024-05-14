@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/config/theme.dart';
 import 'package:qr_checkin/features/qr_event.dart';
 import 'package:qr_checkin/screens/events/events_screen.dart';
@@ -30,7 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final _pageController = PageController();
   late final List<BottomNavigationBarItem> menuItems = [
     _getItem(Icons.home_outlined, Icons.home, 'Trang chủ', theme),
-    _getItem(Icons.confirmation_num_outlined, Icons.confirmation_num, 'Lịch sử', theme),
+    _getItem(Icons.confirmation_num_outlined, Icons.confirmation_num,
+        'Lịch sử', theme),
     BottomNavigationBarItem(icon: Container(), label: ''),
     _getItem(Icons.edit_document, Icons.favorite, 'Yêu thích', theme),
     _getItem(Icons.person_outline, Icons.person, 'Hồ sơ', theme)
@@ -62,18 +61,18 @@ class _HomeScreenState extends State<HomeScreen> {
               const HistoryScreen(),
               Container(),
               Center(
-                child: FilledButton(onPressed:
-                () {
-                  context.push(RouteName.eventCapture);
-                }, child: const Text('Chụp'))
-              ),
+                  child: FilledButton(
+                      onPressed: () {
+                        context.push(RouteName.eventCapture);
+                      },
+                      child: const Text('Chụp'))),
               Center(
-                child: QrImageView(
-                  data: QrEvent(isTicketSeller: false, eventId: 1, code: '123').toString(),
-                  size: 200,
-                  padding: const EdgeInsets.all(16),
-                )
-              ),
+                  child: QrImageView(
+                data: QrEvent(isTicketSeller: false, eventId: 1, code: '123')
+                    .toString(),
+                size: 200,
+                padding: const EdgeInsets.all(16),
+              )),
             ],
           ),
           floatingActionButton: const EventCreateButton(),
@@ -161,5 +160,4 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
 }

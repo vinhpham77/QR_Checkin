@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/config/router.dart';
 import 'package:qr_checkin/features/event/bloc/event_bloc.dart';
 import 'package:qr_checkin/screens/cu_event/second_screen.dart';
@@ -24,15 +25,17 @@ class _CuEventScreenState extends State<CuEventScreen> {
   int count = 3;
 
   bool isLoading = false;
-  final _firstScreenKey = GlobalKey<FirstScreenState>();
-  final _secondScreenKey = GlobalKey<SecondScreenState>();
-  final _thirdScreenKey = GlobalKey<ThirdScreenState>();
+  late final GlobalKey<FirstScreenState> _firstScreenKey;
+  late final GlobalKey<SecondScreenState> _secondScreenKey;
+  late final GlobalKey<ThirdScreenState> _thirdScreenKey;
   late EventDto event;
 
   @override
   void initState() {
     super.initState();
-
+    _firstScreenKey = GlobalKey<FirstScreenState>();
+    _secondScreenKey = GlobalKey<SecondScreenState>();
+    _thirdScreenKey = GlobalKey<ThirdScreenState>();
     if (widget.id != 0) {
       context.read<EventBloc>().add(EventFetchOne(id: widget.id));
     }
@@ -40,25 +43,6 @@ class _CuEventScreenState extends State<CuEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = context.watch<EventBloc>().state;
-
-    var bodyWidget = (switch (authState) {
-      EventInitial() => const Center(child: CircularProgressIndicator()),
-      EventFetchOneLoading() =>
-        const Center(child: CircularProgressIndicator()),
-      EventCreateInitial(event: final eventDto) => _buildStepper(eventDto),
-      EventFetchOneSuccess(event: final eventDto) => _buildStepper(eventDto),
-      EventFetchOneFailure(message: final msg) =>
-        _buildTryAgainModal(msg, context),
-      EventCreating() => _buildOperationInProgress(),
-      EventUpdating() => _buildOperationInProgress(),
-      EventCreateFailure(message: final msg) =>
-        _buildFailureStack(context, msg),
-      EventUpdateFailure(message: final msg) =>
-        _buildFailureStack(context, msg),
-      _ => _buildStepper(event),
-    });
-
     return Scaffold(
       appBar: AppBar(
         title: widget.id == 0
@@ -66,16 +50,41 @@ class _CuEventScreenState extends State<CuEventScreen> {
             : const Text('Chỉnh sửa sự kiện'),
       ),
       body: BlocListener<EventBloc, EventState>(
-          listener: (context, state) {
-            switch (state) {
-              case EventCreated():
-                router.pushReplacement(RouteName.eventDetail, extra: state.event.id);
-                break;
-              default:
-                break;
-            }
+        listener: (context, state) {
+          switch (state) {
+            case EventCreated():
+              context.pushReplacement(RouteName.eventDetail,
+                  extra: state.event.id);
+              break;
+            default:
+              break;
+          }
+        },
+        child: BlocBuilder<EventBloc, EventState>(
+          bloc: context.read<EventBloc>(),
+          builder: (context, state) {
+            return (switch (state) {
+              EventInitial() =>
+                const Center(child: CircularProgressIndicator()),
+              EventFetchOneLoading() =>
+                const Center(child: CircularProgressIndicator()),
+              EventCreateInitial(event: final eventDto) =>
+                _buildStepper(eventDto),
+              EventFetchOneSuccess(event: final eventDto) =>
+                _buildStepper(eventDto),
+              EventFetchOneFailure(message: final msg) =>
+                _buildTryAgainModal(msg, context),
+              EventCreating() => _buildOperationInProgress(),
+              EventUpdating() => _buildOperationInProgress(),
+              EventCreateFailure(message: final msg) =>
+                _buildFailureStack(context, msg),
+              EventUpdateFailure(message: final msg) =>
+                _buildFailureStack(context, msg),
+              _ => _buildStepper(event),
+            });
           },
-          child: bodyWidget),
+        ),
+      ),
     );
   }
 
@@ -228,21 +237,21 @@ class _CuEventScreenState extends State<CuEventScreen> {
       return;
     }
 
-    if (!firstScreen.formKey.currentState!.validate()) {
+    if (!firstScreen.isValidForm) {
       setState(() {
         _index = 0;
       });
       return;
     }
 
-    if (!secondScreen.formKey.currentState!.validate()) {
+    if (!secondScreen.isValidForm) {
       setState(() {
         _index = 1;
       });
       return;
     }
 
-    if (!thirdScreen.formKey.currentState!.validate()) {
+    if (!thirdScreen.isValidForm) {
       setState(() {
         _index = 2;
       });

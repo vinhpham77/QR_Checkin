@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/utils/data_utils.dart';
 
 import '../../config/router.dart';
@@ -15,7 +16,7 @@ class EventItem extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(16),
       onTap: () {
-        router.push(RouteName.eventDetail, extra: event.id);
+        context.push(RouteName.eventDetail, extra: event.id);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
@@ -40,7 +41,8 @@ class EventItem extends StatelessWidget {
               child: Stack(
                 children: [
                   SizedBox(
-                    height: 108,
+                    height: 105,
+                    width: double.infinity,
                     child: Image.network(
                       event.backgroundUrl ?? '',
                       errorBuilder: (context, error, stackTrace) {

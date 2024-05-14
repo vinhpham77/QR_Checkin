@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -333,7 +334,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       Container(
                           padding: const EdgeInsets.only(bottom: 4, left: 8),
                           child: Text(
-                              'Các loại vé ${isEventActive(event) ? '(Đang mở bán)' : '(Đã kết thúc bán vé)'}',
+                              'Các loại vé ${isEventActive(event) ? '' : '(Đã kết thúc)'}',
                               style: themeData.textTheme.titleMedium!.copyWith(
                                 fontWeight: FontWeight.w500,
                                 fontSize: 18,
@@ -422,9 +423,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   ),
                 ),
               ),
-            if (event.isTicketSeller &&
-                event.endAt.isAfter(
-                    DateTime.now().toUtc().add(const Duration(hours: 7))))
+            if (event.isTicketSeller && event.endAt.isAfter(now))
               const SizedBox(
                 height: 8,
               ),
@@ -588,7 +587,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   }
 
   Widget _buildBottomWidget({required EventDto event}) {
-    if (event.startAt.isAfter(DateTime.now())) {
+    if (event.startAt.isAfter(now)) {
       if (UserInfo.username != event.createdBy) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -619,7 +618,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              'Xem danh sách đăng ký tham dự',
+              'Xem danh sách đăng ký',
               style: TextStyle(color: AppColors.white),
             ),
             ElevatedButton(
@@ -637,10 +636,25 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         );
       }
     } else {
-      return Container(
-        padding: const EdgeInsets.only(top: 8, bottom: 8),
-        child: const Text('Sự kiện đã kết thúc!',
-            style: TextStyle(color: AppColors.white)),
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Xem danh sách tham dự',
+            style: TextStyle(color: AppColors.white),
+          ),
+          ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.red,
+              ),
+              onPressed: () {
+                // context.read<EventBloc>().add(EventCancel(id: event.id));
+              },
+              child: const Text(
+                'Xem',
+                style: TextStyle(color: AppColors.white),
+              )),
+        ],
       );
     }
   }
@@ -700,10 +714,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  // show qr code pattern dialog
   void showQrCodePatternDialog({bool isCheckIn = true}) {
-    var now = DateTime.now().toUtc().add(const Duration(hours: 7));
-
     if (now.isBefore(event.startAt)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -829,8 +840,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  bool isEventActive(EventDto event) => event.startAt
-      .isBefore(DateTime.now().toUtc().add(const Duration(hours: 7)));
+  bool isEventActive(EventDto event) => event.startAt.isBefore(now);
 
   @override
   void dispose() {

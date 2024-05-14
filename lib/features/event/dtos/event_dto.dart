@@ -1,4 +1,5 @@
 import 'package:qr_checkin/features/ticket/dtos/ticket_type_dto.dart';
+import 'package:qr_checkin/utils/data_utils.dart';
 
 import '../../category/dtos/category_dto.dart';
 
@@ -29,6 +30,7 @@ class EventDto {
   String updatedBy;
   DateTime? deletedAt;
   String? deletedBy;
+  bool isRegistered;
 
   EventDto({
     required this.id,
@@ -57,6 +59,7 @@ class EventDto {
     required this.updatedBy,
     this.deletedAt,
     this.deletedBy,
+    this.isRegistered = false,
   });
 
   factory EventDto.fromJson(Map<String, dynamic> json) {
@@ -71,8 +74,8 @@ class EventDto {
               .map((e) => TicketTypeDto.fromJson(e))
               .toList()
           : [],
-      startAt: DateTime.parse(json['startAt']),
-      endAt: DateTime.parse(json['endAt']),
+      startAt: DateTime.parse(json['startAt']).toLocal(),
+      endAt: DateTime.parse(json['endAt']).toLocal(),
       location: json['location'],
       latitude: json['latitude'],
       isTicketSeller: json['isTicketSeller'],
@@ -86,15 +89,15 @@ class EventDto {
               .map((e) => CategoryDto.fromJson(e))
               .toList()
           : [],
-      checkinQrCode: json['checkinQrCode'],
+      checkinQrCode: json['checkinQrCode'] ?? '',
       checkoutQrCode: json['checkoutQrCode'],
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt: DateTime.parse(json['createdAt']).toLocal(),
       createdBy: json['createdBy'],
-      updatedAt: DateTime.parse(json['updatedAt']),
+      updatedAt: DateTime.parse(json['updatedAt']).toLocal(),
       updatedBy: json['updatedBy'],
-      deletedAt:
-          json['deletedAt'] != null ? DateTime.parse(json['deletedAt']) : null,
+      deletedAt: tryParseDateTime(json['deletedAt']),
       deletedBy: json['deletedBy'],
+      isRegistered: json['isRegistered'] ?? false,
     );
   }
 
@@ -127,8 +130,8 @@ class EventDto {
       'backgroundUrl': backgroundUrl,
       'description': description,
       'slots': slots,
-      'startAt': startAt.toIso8601String(),
-      'endAt': endAt.toIso8601String(),
+      'startAt': startAt.toUtc().toIso8601String(),
+      'endAt': endAt.toUtc().toIso8601String(),
       'location': location,
       'latitude': latitude.toString(),
       'longitude': longitude.toString(),
@@ -176,9 +179,11 @@ class EventDto {
     String? updatedBy,
     DateTime? deletedAt,
     String? deletedBy,
+    bool? isRegistered,
   }) {
     return EventDto(
       id: id ?? this.id,
+      isRegistered: isRegistered ?? this.isRegistered,
       name: name ?? this.name,
       backgroundUrl: backgroundUrl ?? this.backgroundUrl,
       description: description ?? this.description,
