@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -9,6 +8,7 @@ import 'package:flutter_html/flutter_html.dart' as html;
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/features/ticket/data/ticket_api_client.dart';
+import 'package:qr_checkin/utils/image_utils.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../config/http_client.dart';
@@ -16,6 +16,7 @@ import '../../config/router.dart';
 import '../../config/theme.dart';
 import '../../config/user_info.dart';
 import '../../features/event/bloc/event_bloc.dart';
+import '../../features/event/data/event_repository.dart';
 import '../../features/event/dtos/event_dto.dart';
 import '../../features/qr_event.dart';
 import '../../features/ticket/bloc/ticket_bloc.dart';
@@ -54,13 +55,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   void initState() {
     super.initState();
     countdownController = StreamController<int>.broadcast();
-    context.read<EventBloc>().add(EventFetchOne(id: widget.eventId));
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<TicketBloc>(
-      create: (context) => ticketBloc..add(TicketEventInitial()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => EventBloc(context.read<EventRepository>())..add(EventFetchOne(id: widget.eventId))),
+        BlocProvider(create: (context) => ticketBloc..add(TicketEventInitial())),
+      ],
       child: BlocListener<EventBloc, EventState>(
         listener: (context, state) {
           if (state is EventFetchOneFailure) {
@@ -99,7 +102,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         },
         child: BlocBuilder<EventBloc, EventState>(
           builder: (context, state) {
-            if (state is EventFetchOneSuccess) {
+            if (state is EventInitial) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is EventFetchOneSuccess) {
               event = state.event;
             } else if (state is EventFetchOneFailure) {
               return Center(child: Text(state.message));
@@ -195,7 +200,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               height: 220,
               width: double.infinity,
               child: Image.network(
-                event.backgroundUrl ?? '',
+                getImageUrl(event.backgroundImage),
                 errorBuilder: (context, error, stackTrace) {
                   return Image.asset(
                     'assets/images/placeholder.png',
@@ -635,7 +640,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           ],
         );
       }
-    } else {
+    } else if (UserInfo.username == event.createdBy) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -655,6 +660,35 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 style: TextStyle(color: AppColors.white),
               )),
         ],
+      );
+    } else if (event.endAt.isAfter(now)) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Sự kiện đang diễn ra',
+            style: TextStyle(color: AppColors.white),
+          ),
+          ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.red,
+              ),
+              onPressed: () {
+                context.push(RouteName.scanner);
+              },
+              child: const Text(
+                'Check in',
+                style: TextStyle(color: AppColors.white),
+              ))
+        ],
+      );
+    } else {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: const Text(
+          'Sự kiện đã kết thúc',
+          style: TextStyle(color: AppColors.white),
+        ),
       );
     }
   }

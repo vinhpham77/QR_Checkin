@@ -4,11 +4,9 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:qr_checkin/features/image/data/image_repository.dart';
 
-import '../../../utils/image_utils.dart';
 import '../../result_type.dart';
 
 part 'image_event.dart';
-
 part 'image_state.dart';
 
 class ImageBloc extends Bloc<ImageEvent, ImageState> {
@@ -23,7 +21,7 @@ class ImageBloc extends Bloc<ImageEvent, ImageState> {
     emit(ImageUploading());
     final result = await imageRepository.upload(event.image);
     return (switch (result) {
-      Success() => emit(ImageUploadSuccess(imageUrl: getImageUrl(result.data))),
+      Success() => emit(ImageUploadSuccess(imageName: result.data)),
       Failure() => emit(ImageUploadFailure(message: result.message)),
     });
   }

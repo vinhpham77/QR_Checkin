@@ -29,9 +29,6 @@ class EventCreateButton extends StatelessWidget {
           icon: const Icon(Icons.add),
           tooltip: 'Tạo sự kiện',
           onPressed: () {
-            context
-                .read<EventBloc>()
-                .add(EventPrefilled(event: EventDto.empty()));
             context.push(RouteName.eventCreate);
           },
           style: ButtonStyle(

@@ -13,12 +13,12 @@ final class ImageInitial extends ImageState {}
 final class ImageUploading extends ImageState {}
 
 final class ImageUploadSuccess extends ImageState {
-  final String imageUrl;
+  final String imageName;
 
-  const ImageUploadSuccess({required this.imageUrl});
+  const ImageUploadSuccess({required this.imageName});
 
   @override
-  List<Object?> get props => [imageUrl];
+  List<Object?> get props => [imageName];
 }
 
 final class ImageUploadFailure extends ImageState {

@@ -3,8 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:qr_checkin/features/event/dtos/search_criteria.dart';
 
+import '../../config/http_client.dart';
 import '../../config/theme.dart';
 import '../../features/event/bloc/event_bloc.dart';
+import '../../features/event/data/event_api_client.dart';
+import '../../features/event/data/event_repository.dart';
 import '../../features/event/dtos/event_dto.dart';
 import '../../widgets/location_provider.dart';
 import 'event_item.dart';
@@ -27,6 +30,7 @@ class _EventListScreenState extends State<EventListScreen> {
   bool isLoading = false;
   bool isLastPage = false;
   LatLng? currentLocation;
+  EventBloc eventBloc = EventBloc(EventRepository(EventApiClient(dio)));
 
   @override
   void initState() {
@@ -43,7 +47,7 @@ class _EventListScreenState extends State<EventListScreen> {
 
     if (currentLocation == null) {
       currentLocation = newCurrentLocation;
-      context.read<EventBloc>().add(EventFetch(
+      eventBloc.add(EventFetch(
             page: page,
             limit: limit,
             keyword: widget.searchCriteria.keyword,
@@ -64,59 +68,73 @@ class _EventListScreenState extends State<EventListScreen> {
       appBar: AppBar(
         title: Text(widget.searchCriteria.title),
       ),
-      body: BlocListener<EventBloc, EventState>(
-        listener: (context, state) {
-          if (state is EventFetchFailure) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(state.message)));
-          }
-        },
-        child: BlocBuilder<EventBloc, EventState>(
-          builder: (context, state) {
-            if (state is EventFetchSuccess && state.key == key) {
-              _events.addAll(state.events.items);
-
-              var lastPage = state.events.counter / limit;
-              isLastPage = page >= lastPage;
-              isLoading = false;
-            } else if (state is EventFetchFailure) {
-              isLoading = false;
-            } else if (state is EventFetching) {
-              isLoading = true;
+      body: BlocProvider<EventBloc>(
+        create: (context) => eventBloc..add(EventFetch(
+          page: page,
+          limit: limit,
+          keyword: widget.searchCriteria.keyword,
+          fields: widget.searchCriteria.fields,
+          categoryId: widget.searchCriteria.categoryId,
+          sortField: widget.searchCriteria.sortField,
+          isAsc: widget.searchCriteria.isAsc,
+          longitude: currentLocation?.longitude ?? 0,
+          latitude: currentLocation?.latitude ?? 0,
+          key: key,
+        )),
+        child: BlocListener<EventBloc, EventState>(
+          listener: (context, state) {
+            if (state is EventFetchFailure) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(state.message)));
             }
+          },
+          child: BlocBuilder<EventBloc, EventState>(
+            builder: (context, state) {
+              if (state is EventFetchSuccess && state.key == key) {
+                _events.addAll(state.events.items);
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (_events.isNotEmpty)
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      child: GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.9,
-                          mainAxisSpacing: 10.0,
-                          crossAxisSpacing: 10.0,
+                var lastPage = state.events.counter / limit;
+                isLastPage = page >= lastPage.ceil();
+                isLoading = false;
+              } else if (state is EventFetchFailure) {
+                isLoading = false;
+              } else if (state is EventFetching) {
+                isLoading = true;
+              }
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (_events.isNotEmpty)
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        child: GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.9,
+                            mainAxisSpacing: 10.0,
+                            crossAxisSpacing: 10.0,
+                          ),
+                          controller: _scrollController,
+                          itemCount: _events.length,
+                          itemBuilder: (context, index) {
+                            return EventItem(event: _events[index]);
+                          },
                         ),
-                        controller: _scrollController,
-                        itemCount: _events.length,
-                        itemBuilder: (context, index) {
-                          return EventItem(event: _events[index]);
-                        },
                       ),
                     ),
-                  ),
-                if (isLoading)
-                  Container(
-                    color: AppColors.white.withOpacity(0.3),
-                    alignment: Alignment.center,
-                    child: const CircularProgressIndicator(),
-                  ),
-              ],
-            );
-          },
+                  if (isLoading)
+                    Container(
+                      color: AppColors.white.withOpacity(0.3),
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator(),
+                    ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -127,7 +145,7 @@ class _EventListScreenState extends State<EventListScreen> {
         0.7 * _scrollController.position.maxScrollExtent) {
       if (!isLastPage) {
         page++;
-        context.read<EventBloc>().add(EventFetch(
+        eventBloc.add(EventFetch(
               page: page,
               limit: limit,
               keyword: widget.searchCriteria.keyword,

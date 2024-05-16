@@ -78,16 +78,17 @@ class _TicketsTabState extends State<TicketsTab> with AutomaticKeepAliveClientMi
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     children: [
-                      Expanded(
-                        child: ListView.separated(
-                          padding: EdgeInsets.zero,
-                          separatorBuilder: (context, index) => const SizedBox(height: 8),
-                          itemCount: _ticketDetails.length,
-                          itemBuilder: (context, index) {
-                            return TicketDetailItem(ticketDetail: _ticketDetails[index]);
-                          },
+                      if (_ticketDetails.isNotEmpty)
+                        Expanded(
+                          child: ListView.separated(
+                            padding: EdgeInsets.zero,
+                            separatorBuilder: (context, index) => const SizedBox(height: 8),
+                            itemCount: _ticketDetails.length,
+                            itemBuilder: (context, index) {
+                              return TicketDetailItem(ticketDetail: _ticketDetails[index]);
+                            },
+                          ),
                         ),
-                      ),
                       if (isLoading)
                         Container(
                           color: AppColors.white.withOpacity(0.3),

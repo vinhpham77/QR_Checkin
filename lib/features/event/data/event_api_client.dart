@@ -149,31 +149,27 @@ class EventApiClient {
 
   Future<bool> checkIn(QrEvent qrEvent, Uint8List qrImage,
       bool isCaptureRequired, File? portraitFile, LatLng location) async {
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    File qrImgFile = File('$tempPath/qr_code.png');
+    await qrImgFile.writeAsBytes(qrImage);
+
+    var formData = FormData();
+
+    formData.files.add(MapEntry(
+        'qrImage', MultipartFile.fromFileSync(qrImgFile.path)));
+    if (isCaptureRequired && portraitFile != null) {
+      formData.files.add(MapEntry('portraitImage',
+          MultipartFile.fromFileSync(portraitFile.path)));
+    }
+    formData.fields.add(MapEntry('code', qrEvent.code));
+
+    dio.options.headers['latitude'] = location.latitude;
+    dio.options.headers['longitude'] = location.longitude;
+
     try {
-      Directory tempDir = await getTemporaryDirectory();
-      String tempPath = tempDir.path;
-      File qrImgFile = File('$tempPath/qr_code.png');
-      await qrImgFile.writeAsBytes(qrImage);
-
-      var formData = FormData();
-
-      formData.files.add(MapEntry(
-          'qrImage', MultipartFile.fromFileSync(qrImgFile.path)));
-      if (isCaptureRequired && portraitFile != null) {
-        formData.files.add(MapEntry('portraitImage',
-            MultipartFile.fromFileSync(portraitFile.path)));
-      }
-      formData.fields.add(MapEntry('code', qrEvent.code));
-
-      dio.options.headers['latitude'] = location.latitude;
-      dio.options.headers['longitude'] = location.longitude;
-
       await dio.post('/attendances/${qrEvent.eventId}/check-in',
           data: formData);
-
-      // Xóa tệp sau khi sử dụng
-      await qrImgFile.delete();
-      await portraitFile?.delete();
 
       return qrEvent.isCheckin;
     } on DioException catch (e) {
@@ -184,11 +180,48 @@ class EventApiClient {
       }
     } catch (e) {
       throw Exception(e);
+    } finally {
+      await qrImgFile.delete();
+      await portraitFile?.delete();
     }
   }
 
   Future<bool> checkOut(QrEvent qrEvent, Uint8List qrImage,
-      bool isCaptureRequired, File? portraitFile, LatLng location) {
-    throw UnimplementedError();
+      bool isCaptureRequired, File? portraitFile, LatLng location) async {
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    File qrImgFile = File('$tempPath/qr_code.png');
+    await qrImgFile.writeAsBytes(qrImage);
+
+    var formData = FormData();
+
+    formData.files.add(MapEntry(
+        'qrImage', MultipartFile.fromFileSync(qrImgFile.path)));
+    if (isCaptureRequired && portraitFile != null) {
+      formData.files.add(MapEntry('portraitImage',
+          MultipartFile.fromFileSync(portraitFile.path)));
+    }
+    formData.fields.add(MapEntry('code', qrEvent.code));
+
+    dio.options.headers['latitude'] = location.latitude;
+    dio.options.headers['longitude'] = location.longitude;
+
+    try {
+      await dio.post('/attendances/${qrEvent.eventId}/check-out',
+          data: formData);
+
+      return qrEvent.isCheckin;
+    } on DioException catch (e) {
+      if (e.response != null && e.response!.data != null) {
+        throw Exception(e.response!.data['message']);
+      } else {
+        throw Exception(e.message);
+      }
+    } catch (e) {
+      throw Exception(e);
+    } finally {
+      await qrImgFile.delete();
+      await portraitFile?.delete();
+    }
   }
 }

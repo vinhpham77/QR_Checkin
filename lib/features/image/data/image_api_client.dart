@@ -17,38 +17,10 @@ class ImageApiClient {
       });
 
       final response =
-          await dio.post('${servicePaths['images']}/upload', data: formData);
+          await dio.post('/images/upload', data: formData);
       return response.data;
     } on DioException catch (e) {
       if (e.response!.data['message'] != null) {
-        throw Exception(e.response!.data['message']);
-      } else {
-        throw Exception(e.message);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
-  Future<void> saveByContent(String content) async {
-    try {
-      await dio.post('${servicePaths['images']}/by-content', data: content);
-    } on DioException catch (e) {
-      if (e.response!.data['message']) {
-        throw Exception(e.response!.data['message']);
-      } else {
-        throw Exception(e.message);
-      }
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
-  Future<void> deleteByContent(String content) async {
-    try {
-      await dio.delete('${servicePaths['images']}/by-content', data: content);
-    } on DioException catch (e) {
-      if (e.response!.data['message']) {
         throw Exception(e.response!.data['message']);
       } else {
         throw Exception(e.message);

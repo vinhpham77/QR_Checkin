@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:qr_checkin/utils/image_utils.dart';
 
 class CustomImage extends StatelessWidget {
-  final String? imageUrl;
+  final String? imageName;
   final double size;
   final IconData fallBackIcon;
 
   const CustomImage({
     super.key,
-    this.imageUrl,
+    this.imageName,
     required this.size,
     required this.fallBackIcon,
   });
@@ -15,7 +16,7 @@ class CustomImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.network(
-      imageUrl ?? '',
+      getImageUrl(imageName),
       height: size,
       width: size * 16/9,
       fit: BoxFit.cover,

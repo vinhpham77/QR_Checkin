@@ -26,13 +26,13 @@ class PortraitCaptureScreen extends StatefulWidget {
 
 class _PortraitCaptureScreenState extends State<PortraitCaptureScreen> {
   late final theme = Theme.of(context);
+  bool isTorchOn = false;
   CameraController? cameraController;
   late List<CameraDescription> cameras;
   LatLng? currentLocation;
 
   @override
   void initState() {
-    getCamera();
     super.initState();
   }
 
@@ -53,14 +53,8 @@ class _PortraitCaptureScreenState extends State<PortraitCaptureScreen> {
             IconButton(
               color: Colors.transparent,
               icon: Icon(
-                cameraController != null &&
-                        cameraController?.value.flashMode == FlashMode.torch
-                    ? Icons.flash_on
-                    : Icons.flash_off,
-                color: cameraController != null &&
-                        cameraController?.value.flashMode == FlashMode.torch
-                    ? Colors.yellow
-                    : Colors.grey,
+                isTorchOn ? Icons.flash_on : Icons.flash_off,
+                color: isTorchOn ? Colors.yellow : Colors.grey,
               ),
               iconSize: 24.0,
               onPressed: toggleFlashlight,
@@ -108,43 +102,55 @@ class _PortraitCaptureScreenState extends State<PortraitCaptureScreen> {
             ),
           ],
         ),
-        body: BlocListener<EventBloc, EventState>(
-          listener: (context, state) {
-            if (state is EventCheckSuccess) {
-              context.pop();
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(state.isCheckIn
-                    ? 'Đã check-in thành công'
-                    : 'Đã check-out thành công'),
-                backgroundColor: AppColors.green,
-              ));
-              context.pushReplacement(RouteName.eventDetail,
-                  extra: widget.qrEvent.eventId);
-            } else if (state is EventCheckFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.red,
-              ));
-              context.pop();
-            }
-          },
-          child: BlocBuilder<EventBloc, EventState>(
-              bloc: context.read<EventBloc>(),
-              builder: (context, state) {
-                if (state is EventCheckLoading) {
-                  return Stack(
-                    children: [
-                      _buildBody(
-                          cameraController: cameraController, widget: widget),
-                      const Center(child: CircularProgressIndicator()),
-                    ],
-                  );
-                }
+        body: FutureBuilder(
+            future: getCamera(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                return _buildBody(
-                    cameraController: cameraController, widget: widget);
-              }),
-        ));
+              return BlocListener<EventBloc, EventState>(
+                listener: (context, state) {
+                  if (state is EventCheckSuccess) {
+                    context.pop();
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(state.isCheckIn
+                          ? 'Đã check-in thành công'
+                          : 'Đã check-out thành công'),
+                      backgroundColor: AppColors.green,
+                    ));
+                    context.pop();
+                    context.pushReplacement(RouteName.eventDetail,
+                        extra: widget.qrEvent.eventId);
+                  } else if (state is EventCheckFailure) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: AppColors.red,
+                    ));
+                    context.pop();
+                    context.pop();
+                  }
+                },
+                child: BlocBuilder<EventBloc, EventState>(
+                    bloc: context.read<EventBloc>(),
+                    builder: (context, state) {
+                      if (state is EventCheckLoading) {
+                        return Stack(
+                          children: [
+                            _buildBody(
+                                cameraController: cameraController,
+                                widget: widget),
+                            const Center(child: CircularProgressIndicator()),
+                          ],
+                        );
+                      }
+
+                      return _buildBody(
+                          cameraController: cameraController, widget: widget);
+                    }),
+              );
+            }));
   }
 
   Future<void> toggleFlashlight() async {
@@ -154,8 +160,14 @@ class _PortraitCaptureScreenState extends State<PortraitCaptureScreen> {
             CameraLensDirection.back) {
       if (cameraController?.value.flashMode == FlashMode.off) {
         await cameraController?.setFlashMode(FlashMode.torch);
+        setState(() {
+          isTorchOn = true;
+        });
       } else {
         await cameraController?.setFlashMode(FlashMode.off);
+        setState(() {
+          isTorchOn = false;
+        });
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -165,6 +177,10 @@ class _PortraitCaptureScreenState extends State<PortraitCaptureScreen> {
   }
 
   Future<void> getCamera() async {
+    if (cameraController != null) {
+      return;
+    }
+
     cameras = await availableCameras();
     cameraController = CameraController(
       cameras.firstWhere(
@@ -260,5 +276,11 @@ class _PortraitCaptureScreenState extends State<PortraitCaptureScreen> {
           ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    cameraController?.dispose();
+    super.dispose();
   }
 }

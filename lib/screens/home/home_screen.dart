@@ -56,16 +56,15 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
             children: [
-              // TODO: Prevent the page from being rebuilt when switching between tabs
               const EventsScreen(),
               const HistoryScreen(),
               Container(),
               Center(
                   child: FilledButton(
                       onPressed: () {
-                        context.push(RouteName.eventCapture);
+                        context.push(RouteName.eventUpdate, extra: 1);
                       },
-                      child: const Text('Chụp'))),
+                      child: const Text('Edit'))),
               Center(
                   child: QrImageView(
                 data: QrEvent(isTicketSeller: false, eventId: 1, code: '123')
@@ -142,10 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     return widget;
-  }
-
-  void _handleLogout(BuildContext context) {
-    context.read<AuthBloc>().add(AuthLogoutStarted());
   }
 
   BottomNavigationBarItem _getItem(IconData iconData, IconData activeIconData,

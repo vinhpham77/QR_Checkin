@@ -6,7 +6,7 @@ class UserDto {
   String? fullName;
   String role;
   String status;
-  String? avatarUrl;
+  String? avatar;
   bool? sex;
   DateTime? birthdate;
   DateTime createdAt;
@@ -18,7 +18,7 @@ class UserDto {
     this.fullName,
     required this.role,
     required this.status,
-    required this.avatarUrl,
+    required this.avatar,
     this.birthdate,
     required this.createdAt,
     this.updatedAt,
@@ -33,7 +33,7 @@ class UserDto {
       role: json['role'],
       sex: json['sex'],
       status: json['status'],
-      avatarUrl: json['avatarUrl'],
+      avatar: json['avatar'],
       birthdate: tryParseDateTime(json['birthdate']),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: tryParseDateTime(json['updatedAt']),
@@ -47,7 +47,7 @@ class UserDto {
       fullName: '',
       role: '',
       status: '',
-      avatarUrl: '',
+      avatar: '',
       birthdate: null,
       createdAt: DateTime.now(),
       updatedAt: null,
@@ -61,7 +61,7 @@ class UserDto {
       'fullName': fullName,
       'role': role,
       'birthDate': birthdate?.toUtc().toIso8601String(),
-      'avatarUrl': avatarUrl,
+      'avatar': avatar,
       'sex': sex,
     };
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/utils/data_utils.dart';
+import 'package:qr_checkin/utils/image_utils.dart';
 
 import '../../config/router.dart';
 import '../../config/theme.dart';
@@ -44,7 +45,7 @@ class EventItem extends StatelessWidget {
                     height: 105,
                     width: double.infinity,
                     child: Image.network(
-                      event.backgroundUrl ?? '',
+                      getImageUrl(event.backgroundImage),
                       errorBuilder: (context, error, stackTrace) {
                         return Image.asset(
                           'assets/images/placeholder.png',

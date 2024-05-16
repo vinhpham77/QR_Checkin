@@ -203,7 +203,7 @@ class _EventsScreenState extends State<EventsScreen>
                           const SizedBox(width: 8),
                       itemBuilder: (context, index) => Event(
                         eventId: nearestEvents.items[index].id,
-                        imageUrl: nearestEvents.items[index].backgroundUrl,
+                        imageName: nearestEvents.items[index].backgroundImage,
                         title: nearestEvents.items[index].name,
                         organizer: nearestEvents.items[index].createdBy,
                         isRegistered: false,
@@ -264,7 +264,7 @@ class _EventsScreenState extends State<EventsScreen>
                           const SizedBox(width: 8),
                       itemBuilder: (context, index) => Event(
                         eventId: newestEvents.items[index].id,
-                        imageUrl: newestEvents.items[index].backgroundUrl,
+                        imageName: newestEvents.items[index].backgroundImage,
                         title: newestEvents.items[index].name,
                         organizer: newestEvents.items[index].createdBy,
                         isRegistered: false,
@@ -325,7 +325,7 @@ class _EventsScreenState extends State<EventsScreen>
                           const SizedBox(width: 8),
                       itemBuilder: (context, index) => Event(
                         eventId: latestEvents.items[index].id,
-                        imageUrl: latestEvents.items[index].backgroundUrl,
+                        imageName: latestEvents.items[index].backgroundImage,
                         title: latestEvents.items[index].name,
                         organizer: latestEvents.items[index].createdBy,
                         isRegistered: false,

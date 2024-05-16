@@ -3,9 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/config/router.dart';
 import 'package:qr_checkin/features/event/bloc/event_bloc.dart';
+import 'package:qr_checkin/features/event/data/event_api_client.dart';
+import 'package:qr_checkin/features/event/data/event_repository.dart';
 import 'package:qr_checkin/screens/cu_event/second_screen.dart';
 import 'package:qr_checkin/screens/cu_event/third_screen.dart';
 
+import '../../config/http_client.dart';
 import '../../config/theme.dart';
 import '../../features/event/dtos/event_dto.dart';
 import '../../widgets/modal.dart';
@@ -25,20 +28,18 @@ class _CuEventScreenState extends State<CuEventScreen> {
   int count = 3;
 
   bool isLoading = false;
-  late final GlobalKey<FirstScreenState> _firstScreenKey;
-  late final GlobalKey<SecondScreenState> _secondScreenKey;
-  late final GlobalKey<ThirdScreenState> _thirdScreenKey;
+  GlobalKey<FirstScreenState>? _firstScreenKey;
+  GlobalKey<SecondScreenState>? _secondScreenKey;
+  GlobalKey<ThirdScreenState>? _thirdScreenKey;
   late EventDto event;
+  final EventBloc eventBloc = EventBloc(EventRepository(EventApiClient(dio)));
 
   @override
   void initState() {
     super.initState();
-    _firstScreenKey = GlobalKey<FirstScreenState>();
-    _secondScreenKey = GlobalKey<SecondScreenState>();
-    _thirdScreenKey = GlobalKey<ThirdScreenState>();
-    if (widget.id != 0) {
-      context.read<EventBloc>().add(EventFetchOne(id: widget.id));
-    }
+    _firstScreenKey ??= GlobalKey<FirstScreenState>();
+    _secondScreenKey ??= GlobalKey<SecondScreenState>();
+    _thirdScreenKey ??= GlobalKey<ThirdScreenState>();
   }
 
   @override
@@ -50,38 +51,62 @@ class _CuEventScreenState extends State<CuEventScreen> {
             : const Text('Chỉnh sửa sự kiện'),
       ),
       body: BlocListener<EventBloc, EventState>(
+        bloc: eventBloc,
         listener: (context, state) {
-          switch (state) {
-            case EventCreated():
-              context.pushReplacement(RouteName.eventDetail,
-                  extra: state.event.id);
-              break;
-            default:
-              break;
+          if (state is EventCreated) {
+            context.pushReplacement(RouteName.eventDetail, extra: state.event.id);
           }
         },
         child: BlocBuilder<EventBloc, EventState>(
-          bloc: context.read<EventBloc>(),
+          bloc: eventBloc,
           builder: (context, state) {
-            return (switch (state) {
-              EventInitial() =>
-                const Center(child: CircularProgressIndicator()),
-              EventFetchOneLoading() =>
-                const Center(child: CircularProgressIndicator()),
-              EventCreateInitial(event: final eventDto) =>
-                _buildStepper(eventDto),
-              EventFetchOneSuccess(event: final eventDto) =>
-                _buildStepper(eventDto),
-              EventFetchOneFailure(message: final msg) =>
-                _buildTryAgainModal(msg, context),
-              EventCreating() => _buildOperationInProgress(),
-              EventUpdating() => _buildOperationInProgress(),
-              EventCreateFailure(message: final msg) =>
-                _buildFailureStack(context, msg),
-              EventUpdateFailure(message: final msg) =>
-                _buildFailureStack(context, msg),
-              _ => _buildStepper(event),
-            });
+            if (state is EventCreateInitial) {
+              event = state.event;
+            } else if (state is EventFetchOneSuccess) {
+              event = state.event;
+              return _buildStepper(event);
+            } else if (state is EventCreateFailure) {
+              return _buildFailureStack(context, state.message);
+            } else if (state is EventUpdateFailure) {
+              return _buildFailureStack(context, state.message);
+            } else if (state is EventCreating || state is EventUpdating) {
+              return _buildOperationInProgress();
+            } else if (state is EventFetchOneFailure) {
+              return _buildTryAgainModal(state.message, context);
+            } else if (state is EventFetchOneLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is EventInitial) {
+              if (widget.id != 0) {
+                eventBloc.add(EventFetchOne(id: widget.id));
+              } else {
+                eventBloc.add(EventPrefilled(event: EventDto.empty()));
+              }
+              return const Center(child: CircularProgressIndicator());
+            }  else if (state is EventCreateFailure) {
+              return _buildFailureStack(context, state.message);
+            } else if (state is EventUpdateFailure) {
+              return _buildFailureStack(context, state.message);
+            }
+
+            return _buildStepper(event);
+
+            // return (switch (state) {
+            //   EventInitial() =>
+            //     const Center(child: CircularProgressIndicator()),
+            //   EventFetchOneLoading() =>
+            //     const Center(child: CircularProgressIndicator()),
+            //   EventFetchOneSuccess(event: final eventDto) =>
+            //     _buildStepper(),
+            //   EventFetchOneFailure(message: final msg) =>
+            //     _buildTryAgainModal(msg, context),
+            //   EventCreating() => _buildOperationInProgress(),
+            //   EventUpdating() => _buildOperationInProgress(),
+            //   EventCreateFailure(message: final msg) =>
+            //     _buildFailureStack(context, msg),
+            //   EventUpdateFailure(message: final msg) =>
+            //     _buildFailureStack(context, msg),
+            //   _ => _buildStepper(),
+            // });
           },
         ),
       ),
@@ -137,9 +162,7 @@ class _CuEventScreenState extends State<CuEventScreen> {
     );
   }
 
-  Stepper _buildStepper(EventDto eventDto) {
-    event = eventDto;
-
+  Stepper _buildStepper(EventDto event) {
     return Stepper(
       controlsBuilder: (context, details) {
         return Container(
@@ -229,9 +252,9 @@ class _CuEventScreenState extends State<CuEventScreen> {
 
   Future<void> _handleCuEvent(
       {required BuildContext context, required bool isCreating}) async {
-    final firstScreen = _firstScreenKey.currentState;
-    final secondScreen = _secondScreenKey.currentState;
-    final thirdScreen = _thirdScreenKey.currentState;
+    final firstScreen = _firstScreenKey?.currentState;
+    final secondScreen = _secondScreenKey?.currentState;
+    final thirdScreen = _thirdScreenKey?.currentState;
 
     if (firstScreen == null || secondScreen == null || thirdScreen == null) {
       return;
@@ -262,7 +285,7 @@ class _CuEventScreenState extends State<CuEventScreen> {
 
     final newEvent = event.copyWith(
       id: firstScreen.id,
-      backgroundUrl: firstScreen.backgroundUrl,
+      backgroundImage: firstScreen.backgroundImage,
       name: firstScreen.name,
       description: description,
       location: secondScreen.location,
@@ -293,6 +316,9 @@ class _CuEventScreenState extends State<CuEventScreen> {
 
   @override
   void dispose() {
+    _firstScreenKey?.currentState?.dispose();
+    _secondScreenKey?.currentState?.dispose();
+    _thirdScreenKey?.currentState?.dispose();
     super.dispose();
   }
 }

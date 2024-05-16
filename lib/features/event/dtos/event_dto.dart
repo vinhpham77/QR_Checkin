@@ -6,7 +6,7 @@ import '../../category/dtos/category_dto.dart';
 class EventDto {
   int id;
   String name;
-  String? backgroundUrl;
+  String? backgroundImage;
   String? description;
   int? slots;
   double distance;
@@ -34,7 +34,7 @@ class EventDto {
 
   EventDto({
     required this.id,
-    this.backgroundUrl,
+    this.backgroundImage,
     required this.name,
     this.description,
     this.slots,
@@ -66,7 +66,7 @@ class EventDto {
     return EventDto(
       id: json['id'],
       name: json['name'],
-      backgroundUrl: json['backgroundUrl'],
+      backgroundImage: json['backgroundImage'],
       description: json['description'],
       slots: json['slots'],
       ticketTypes: json['ticketTypes'] != null
@@ -105,7 +105,7 @@ class EventDto {
     return EventDto(
       id: 0,
       name: '',
-      backgroundUrl: null,
+      backgroundImage: null,
       description: '',
       location: '',
       isTicketSeller: false,
@@ -127,7 +127,7 @@ class EventDto {
     return {
       'id': id,
       'name': name,
-      'backgroundUrl': backgroundUrl,
+      'backgroundImage': backgroundImage,
       'description': description,
       'slots': slots,
       'startAt': startAt.toUtc().toIso8601String(),
@@ -156,7 +156,7 @@ class EventDto {
     int? id,
     String? name,
     String? description,
-    String? backgroundUrl,
+    String? backgroundImage,
     int? slots,
     DateTime? startAt,
     DateTime? endAt,
@@ -185,7 +185,7 @@ class EventDto {
       id: id ?? this.id,
       isRegistered: isRegistered ?? this.isRegistered,
       name: name ?? this.name,
-      backgroundUrl: backgroundUrl ?? this.backgroundUrl,
+      backgroundImage: backgroundImage ?? this.backgroundImage,
       description: description ?? this.description,
       slots: slots ?? this.slots,
       startAt: startAt ?? this.startAt,

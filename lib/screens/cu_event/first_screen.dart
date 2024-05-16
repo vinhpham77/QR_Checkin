@@ -22,9 +22,9 @@ import '../../widgets/custom_image.dart';
 import '../../widgets/editor.dart';
 
 class FirstScreen extends StatefulWidget {
-  final EventDto event;
+  EventDto event;
 
-  const FirstScreen({super.key, required this.event});
+  FirstScreen({super.key, required this.event});
 
   @override
   State<FirstScreen> createState() => FirstScreenState();
@@ -32,7 +32,7 @@ class FirstScreen extends StatefulWidget {
 
 class FirstScreenState extends State<FirstScreen> {
   late int id;
-  late String? backgroundUrl;
+  late String? backgroundImage;
   late final TextEditingController _nameController;
   late final QuillEditorController _descriptionController;
   late List<CategoryDto> selectedCategories;
@@ -55,7 +55,7 @@ class FirstScreenState extends State<FirstScreen> {
     _nameController = TextEditingController(text: widget.event.name);
     _descriptionController = QuillEditorController();
     selectedCategories = [...widget.event.categories];
-    backgroundUrl = widget.event.backgroundUrl;
+    backgroundImage = widget.event.backgroundImage;
 
     _nameFocusNode.addListener(() {
       if (!_nameFocusNode.hasFocus) {
@@ -112,8 +112,7 @@ class FirstScreenState extends State<FirstScreen> {
                   }
 
                   if (state is ImageUploadSuccess) {
-                    log(state.imageUrl);
-                    backgroundUrl = state.imageUrl;
+                    backgroundImage = state.imageName;
                   }
 
                   return _buildBackground(false);
@@ -262,7 +261,7 @@ class FirstScreenState extends State<FirstScreen> {
             borderRadius: BorderRadius.circular(AppSizes.fieldRadius),
             child: CustomImage(
               size: 140,
-              imageUrl: backgroundUrl,
+              imageName: backgroundImage,
               fallBackIcon: Icons.photo,
             ),
           ),

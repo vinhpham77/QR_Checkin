@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/config/router.dart';
+import 'package:qr_checkin/utils/image_utils.dart';
 
 import '../../config/theme.dart';
 
 class Event extends StatelessWidget {
   final int? eventId;
   final bool isRegistered;
-  final String? imageUrl;
+  final String? imageName;
   final String title;
   final String? organizer;
   final String? description;
@@ -16,7 +17,7 @@ class Event extends StatelessWidget {
     super.key,
     required this.isRegistered,
     required this.eventId,
-    required this.imageUrl,
+    required this.imageName,
     required this.title,
     required this.organizer,
     required this.description,
@@ -55,7 +56,7 @@ class Event extends StatelessWidget {
                     height: 112,
                     width: 200,
                     child: Image.network(
-                      imageUrl ?? '',
+                      getImageUrl(imageName),
                       errorBuilder: (context, error, stackTrace) {
                         return Image.asset(
                           'assets/images/placeholder.png',
