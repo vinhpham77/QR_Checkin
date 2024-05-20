@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
@@ -115,10 +114,34 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                       'qrImage': img,
                     });
                   } else {
-                    context.read<EventBloc>().add(
-                        EventCheck(qrEvent: qrEvent!, qrImg: img!, isCaptureRequired: false, portraitImage: null, location: currentLocation!));
+                    context.read<EventBloc>().add(EventCheck(
+                        qrEvent: qrEvent!,
+                        qrImg: img!,
+                        isCaptureRequired: false,
+                        portraitImage: null,
+                        location: currentLocation!));
                   }
                 }
+              } else if (state is EventCheckSuccess) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.isCheckIn
+                        ? 'Check in thành công'
+                        : 'Check out thành công'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                Navigator.of(context).pop();
+              } else if (state is EventCheckFailure) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                Navigator.of(context).pop();
               }
             },
             child: BlocListener<TicketBloc, TicketState>(
@@ -156,7 +179,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: Text('Mã QR'),
+                              title: const Text('Mã QR'),
                               content: SizedBox(
                                 width: 360,
                                 child: Column(
@@ -175,16 +198,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
 
                           cameraController.stop();
 
-                          if (barcode.rawValue != null) {
+                          if (barcode.rawValue != null && qrEvent == null) {
                             try {
-                              log('${barcode.rawValue}');
                               qrEvent =
                                   QrEvent.fromQrCode(barcode.rawValue ?? '');
                               context.read<EventBloc>().add(
                                   EventRegistrationCheck(
                                       eventId: qrEvent!.eventId));
                             } catch (e) {
-                              log('$e');
                               Navigator.of(context).pop();
                               showDialog(
                                   context: context,
@@ -195,6 +216,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                                           FilledButton(
                                               onPressed: () {
                                                 Navigator.of(context).pop();
+                                                setState(() {
+                                                  qrEvent = null;
+                                                });
                                                 cameraController.start();
                                               },
                                               child: const Text('Thử lại'))

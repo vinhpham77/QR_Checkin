@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:qr_checkin/features/event/bloc/event_bloc.dart';
 
 import '../config/router.dart';
 import '../config/theme.dart';
-import '../features/event/dtos/event_dto.dart';
 
 class EventCreateButton extends StatelessWidget {
   const EventCreateButton({super.key});

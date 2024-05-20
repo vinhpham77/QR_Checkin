@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:qr_checkin/screens/history/registration_tab.dart';
 import 'package:qr_checkin/screens/history/tickets_tab.dart';
 
 import '../../config/theme.dart';
@@ -13,9 +14,6 @@ class HistoryScreen extends StatefulWidget {
 class _HistoryScreenState extends State<HistoryScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
-  final _registrationController = ScrollController();
-  bool isLastRegistrationPage = false;
-  int registrationPage = 1;
 
   @override
   void initState() {
@@ -47,22 +45,9 @@ class _HistoryScreenState extends State<HistoryScreen>
       },
       body: TabBarView(
         controller: _tabController,
-        children: [
-          ListView.builder(
-            padding: EdgeInsets.zero,
-            controller: _registrationController,
-            scrollDirection: Axis.vertical,
-            itemCount: 20,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text('Sự kiện $index'),
-                subtitle: const Text(
-                    'Địa chỉ: 123 Điện Biên Phủ, Quận 1, TP.HCM'),
-                trailing: const Icon(Icons.arrow_forward_ios),
-              );
-            },
-          ),
-          const TicketsTab()
+        children: const [
+          RegistrationTab(),
+          TicketsTab()
         ],
       ),
     );

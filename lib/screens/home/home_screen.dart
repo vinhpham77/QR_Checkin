@@ -51,20 +51,18 @@ class _HomeScreenState extends State<HomeScreen> {
             padEnds: false,
             physics: const NeverScrollableScrollPhysics(),
             onPageChanged: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
+              if (index != 2) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              }
             },
             children: [
               const EventsScreen(),
               const HistoryScreen(),
               Container(),
-              Center(
-                  child: FilledButton(
-                      onPressed: () {
-                        context.push(RouteName.eventUpdate, extra: 1);
-                      },
-                      child: const Text('Edit'))),
+              const Center(
+                  child: Text('Tính năng sắp ra mắt', style: TextStyle(fontSize: 24))),
               Center(
                   child: QrImageView(
                 data: QrEvent(isTicketSeller: false, eventId: 1, code: '123')

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
 import '../utils/data_utils.dart';
@@ -76,7 +74,8 @@ class _DateTimePickerState extends State<DateTimePicker> {
         initialTime: TimeOfDay.fromDateTime(widget.initialDate),
       );
       if (time != null) {
-        var dateTime = DateTime(picked.year, picked.month, picked.day, time.hour, time.minute);
+        var dateTime = DateTime(
+            picked.year, picked.month, picked.day, time.hour, time.minute);
         widget.onDateTimeChanged(dateTime);
 
         setState(() {

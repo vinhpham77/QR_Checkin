@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:qr_checkin/config/http_client.dart';
 
 class ImageApiClient {
   final Dio dio;
@@ -16,8 +15,7 @@ class ImageApiClient {
         "file": MultipartFile.fromBytes(fileBytes, filename: fileName),
       });
 
-      final response =
-          await dio.post('/images/upload', data: formData);
+      final response = await dio.post('/images/upload', data: formData);
       return response.data;
     } on DioException catch (e) {
       if (e.response!.data['message'] != null) {

@@ -16,7 +16,6 @@ import '../../config/router.dart';
 import '../../config/theme.dart';
 import '../../config/user_info.dart';
 import '../../features/event/bloc/event_bloc.dart';
-import '../../features/event/data/event_repository.dart';
 import '../../features/event/dtos/event_dto.dart';
 import '../../features/qr_event.dart';
 import '../../features/ticket/bloc/ticket_bloc.dart';
@@ -55,14 +54,15 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   void initState() {
     super.initState();
     countdownController = StreamController<int>.broadcast();
+    context.read<EventBloc>().add(EventFetchOne(id: widget.eventId));
   }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => EventBloc(context.read<EventRepository>())..add(EventFetchOne(id: widget.eventId))),
-        BlocProvider(create: (context) => ticketBloc..add(TicketEventInitial())),
+        BlocProvider(
+            create: (context) => ticketBloc..add(TicketEventInitial())),
       ],
       child: BlocListener<EventBloc, EventState>(
         listener: (context, state) {
@@ -161,7 +161,53 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     context.push(RouteName.eventUpdate, extra: event.id);
                     break;
                   case 'report':
-                    // context.go(Routes.eventReport(eventId: event.id));
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Báo cáo sự kiện'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextFormField(
+                                decoration: const InputDecoration(
+                                  hintText: 'Nhập tiêu đề',
+                                  filled: true,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              TextField(
+                                decoration: const InputDecoration(
+                                  filled: true,
+                                  hintText: 'Nhập nội dung báo cáo',
+                                ),
+                              ),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('Hủy'),
+                            ),
+                            FilledButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Tính năng sẽ sớm được hỗ trợ'),
+                                    backgroundColor: Colors.indigo,
+                                  ),
+                                );
+                              },
+                              child: const Text('Gửi'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
                     break;
                   case 'qr':
                     showQrCodeDialog();
@@ -187,11 +233,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         ],
       ),
       bottomNavigationBar: event.isTicketSeller
-          ? null
+          ? _buildTicketBottomWidget(event: event)
           : Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               color: AppColors.black,
-              child: _buildBottomWidget(event: event)),
+              child: _buildAttendanceBottomWidget(event: event)),
       body: SingleChildScrollViewWithColumn(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -569,16 +615,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      event.createdBy,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        color: AppColors.black,
-                      ),
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  //   child: Text(
+                  //     event.createdBy,
+                  //     style: const TextStyle(
+                  //       fontSize: 17,
+                  //       color: AppColors.black,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -591,7 +637,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  Widget _buildBottomWidget({required EventDto event}) {
+  Widget _buildAttendanceBottomWidget({required EventDto event}) {
     if (event.startAt.isAfter(now)) {
       if (UserInfo.username != event.createdBy) {
         return Row(
@@ -631,7 +677,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   backgroundColor: AppColors.red,
                 ),
                 onPressed: () {
-                  // context.read<EventBloc>().add(EventCancel(id: event.id));
+                  router.push(RouteName.attendances, extra: {
+                    'eventId': event.id,
+                    'isTicketSeller': event.isTicketSeller,
+                    'approvalRequired': event.approvalRequired,
+                    'selectedTabIndex': 2,
+                  });
                 },
                 child: const Text(
                   'Xem',
@@ -653,7 +704,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 backgroundColor: AppColors.red,
               ),
               onPressed: () {
-                // context.read<EventBloc>().add(EventCancel(id: event.id));
+                router.push(RouteName.attendances, extra: {
+                  'eventId': event.id,
+                  'isTicketSeller': event.isTicketSeller,
+                  'approvalRequired': event.approvalRequired,
+                  'selectedTabIndex': 0,
+                });
               },
               child: const Text(
                 'Xem',
@@ -693,7 +749,74 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     }
   }
 
-  // show qr code dialog
+  Widget? _buildTicketBottomWidget({required EventDto event}) {
+    if (UserInfo.username != event.createdBy) {
+      return null;
+    }
+
+    if (event.endAt.isAfter(now)) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        color: AppColors.black,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Xem danh sách khách mua vé',
+              style: TextStyle(color: AppColors.white),
+            ),
+            ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.red,
+                ),
+                onPressed: () {
+                  router.push(RouteName.attendances, extra: {
+                    'eventId': event.id,
+                    'isTicketSeller': event.isTicketSeller,
+                    'approvalRequired': event.approvalRequired,
+                    'selectedTabIndex': 1,
+                  });
+                },
+                child: const Text(
+                  'Xem',
+                  style: TextStyle(color: AppColors.white),
+                ))
+          ],
+        ),
+      );
+    } else {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        color: AppColors.black,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Xem danh sách khách tham dự',
+              style: TextStyle(color: AppColors.white),
+            ),
+            ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.red,
+                ),
+                onPressed: () {
+                  router.push(RouteName.attendances, extra: {
+                    'eventId': event.id,
+                    'isTicketSeller': event.isTicketSeller,
+                    'approvalRequired': event.approvalRequired,
+                    'selectedTabIndex': 0,
+                  });
+                },
+                child: const Text(
+                  'Xem',
+                  style: TextStyle(color: AppColors.white),
+                ))
+          ],
+        ),
+      );
+    }
+  }
+
   void showQrCodeDialog() {
     showDialog(
       context: context,

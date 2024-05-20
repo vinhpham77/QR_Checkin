@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_checkin/config/theme.dart';
@@ -46,6 +44,7 @@ class FirstScreenState extends State<FirstScreen> {
   bool get isValidForm => _formKey.currentState!.validate();
 
   String get name => _nameController.text;
+
   Future<String> get description => _descriptionController.getText();
 
   @override

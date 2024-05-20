@@ -9,6 +9,7 @@ import 'package:qr_checkin/screens/portrait_capture/portrait_capture_screen.dart
 import 'package:qr_checkin/screens/search/search_screen.dart';
 
 import '../features/auth/bloc/auth_bloc.dart';
+import '../screens/attendances/attendances_screen.dart';
 import '../screens/cu_event/cu_event_screen.dart';
 import '../screens/event_detail/event_detail_screen.dart';
 import '../screens/home/home_screen.dart';
@@ -30,6 +31,7 @@ class RouteName {
   static const String eventList = '/event/list';
   static const String eventCapture = '/event/capture';
   static const String eventDetail = '/event/detail';
+  static const String attendances = '/attendances';
 
   static const publicRoutes = [
     login,
@@ -110,5 +112,17 @@ final router = GoRouter(
           int id = state.extra as int;
           return EventDetailScreen(eventId: id);
         }),
+    GoRoute(
+      path: RouteName.attendances,
+      builder: (context, state) {
+        var map = state.extra as Map<String, dynamic>;
+        return AttendancesScreen(
+          eventId: map['eventId'] as int,
+          isTicketSeller: map['isTicketSeller'] as bool,
+          approvalRequired: map['approvalRequired'] as bool,
+          selectedTabIndex: map['selectedTabIndex'] as int,
+        );
+      },
+    ),
   ],
 );

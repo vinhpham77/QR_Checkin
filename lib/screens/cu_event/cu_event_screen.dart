@@ -50,64 +50,67 @@ class _CuEventScreenState extends State<CuEventScreen> {
             ? const Text('Tạo sự kiện')
             : const Text('Chỉnh sửa sự kiện'),
       ),
-      body: BlocListener<EventBloc, EventState>(
-        bloc: eventBloc,
-        listener: (context, state) {
-          if (state is EventCreated) {
-            context.pushReplacement(RouteName.eventDetail, extra: state.event.id);
-          }
-        },
-        child: BlocBuilder<EventBloc, EventState>(
+      body: BlocProvider<EventBloc>(
+        create: (context) => eventBloc,
+        child: BlocListener<EventBloc, EventState>(
           bloc: eventBloc,
-          builder: (context, state) {
-            if (state is EventCreateInitial) {
-              event = state.event;
-            } else if (state is EventFetchOneSuccess) {
-              event = state.event;
-              return _buildStepper(event);
-            } else if (state is EventCreateFailure) {
-              return _buildFailureStack(context, state.message);
-            } else if (state is EventUpdateFailure) {
-              return _buildFailureStack(context, state.message);
-            } else if (state is EventCreating || state is EventUpdating) {
-              return _buildOperationInProgress();
-            } else if (state is EventFetchOneFailure) {
-              return _buildTryAgainModal(state.message, context);
-            } else if (state is EventFetchOneLoading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (state is EventInitial) {
-              if (widget.id != 0) {
-                eventBloc.add(EventFetchOne(id: widget.id));
-              } else {
-                eventBloc.add(EventPrefilled(event: EventDto.empty()));
-              }
-              return const Center(child: CircularProgressIndicator());
-            }  else if (state is EventCreateFailure) {
-              return _buildFailureStack(context, state.message);
-            } else if (state is EventUpdateFailure) {
-              return _buildFailureStack(context, state.message);
+          listener: (context, state) {
+            if (state is EventCreated) {
+              context.pushReplacement(RouteName.eventDetail, extra: state.event.id);
             }
-
-            return _buildStepper(event);
-
-            // return (switch (state) {
-            //   EventInitial() =>
-            //     const Center(child: CircularProgressIndicator()),
-            //   EventFetchOneLoading() =>
-            //     const Center(child: CircularProgressIndicator()),
-            //   EventFetchOneSuccess(event: final eventDto) =>
-            //     _buildStepper(),
-            //   EventFetchOneFailure(message: final msg) =>
-            //     _buildTryAgainModal(msg, context),
-            //   EventCreating() => _buildOperationInProgress(),
-            //   EventUpdating() => _buildOperationInProgress(),
-            //   EventCreateFailure(message: final msg) =>
-            //     _buildFailureStack(context, msg),
-            //   EventUpdateFailure(message: final msg) =>
-            //     _buildFailureStack(context, msg),
-            //   _ => _buildStepper(),
-            // });
           },
+          child: BlocBuilder<EventBloc, EventState>(
+            bloc: eventBloc,
+            builder: (context, state) {
+              if (state is EventCreateInitial) {
+                event = state.event;
+              } else if (state is EventFetchOneSuccess) {
+                event = state.event;
+                return _buildStepper(event);
+              } else if (state is EventCreateFailure) {
+                return _buildFailureStack(context, state.message);
+              } else if (state is EventUpdateFailure) {
+                return _buildFailureStack(context, state.message);
+              } else if (state is EventCreating || state is EventUpdating) {
+                return _buildOperationInProgress();
+              } else if (state is EventFetchOneFailure) {
+                return _buildTryAgainModal(state.message, context);
+              } else if (state is EventFetchOneLoading) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (state is EventInitial) {
+                if (widget.id != 0) {
+                  eventBloc.add(EventFetchOne(id: widget.id));
+                } else {
+                  eventBloc.add(EventPrefilled(event: EventDto.empty()));
+                }
+                return const Center(child: CircularProgressIndicator());
+              }  else if (state is EventCreateFailure) {
+                return _buildFailureStack(context, state.message);
+              } else if (state is EventUpdateFailure) {
+                return _buildFailureStack(context, state.message);
+              }
+
+              return _buildStepper(event);
+
+              // return (switch (state) {
+              //   EventInitial() =>
+              //     const Center(child: CircularProgressIndicator()),
+              //   EventFetchOneLoading() =>
+              //     const Center(child: CircularProgressIndicator()),
+              //   EventFetchOneSuccess(event: final eventDto) =>
+              //     _buildStepper(),
+              //   EventFetchOneFailure(message: final msg) =>
+              //     _buildTryAgainModal(msg, context),
+              //   EventCreating() => _buildOperationInProgress(),
+              //   EventUpdating() => _buildOperationInProgress(),
+              //   EventCreateFailure(message: final msg) =>
+              //     _buildFailureStack(context, msg),
+              //   EventUpdateFailure(message: final msg) =>
+              //     _buildFailureStack(context, msg),
+              //   _ => _buildStepper(),
+              // });
+            },
+          ),
         ),
       ),
     );

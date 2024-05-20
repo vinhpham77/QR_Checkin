@@ -48,3 +48,27 @@ final class TicketDetailFetch extends TicketEvent {
   @override
   List<Object> get props => [page, size];
 }
+
+final class TicketBuyerFetch extends TicketEvent {
+  final int eventId;
+  final int page;
+  final int size;
+
+  const TicketBuyerFetch(
+      {required this.eventId, this.page = 1, this.size = 10});
+
+  @override
+  List<Object> get props => [eventId, page, size];
+}
+
+final class TicketCheckInFetch extends TicketEvent {
+  final int eventId;
+  final int page;
+  final int size;
+
+  const TicketCheckInFetch(
+      {required this.eventId, this.page = 1, this.size = 10});
+
+  @override
+  List<Object> get props => [eventId, page, size];
+}

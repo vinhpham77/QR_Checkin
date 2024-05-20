@@ -8,6 +8,7 @@ import '../data/ticket_repository.dart';
 import '../data/ticket_type_repository.dart';
 import '../dtos/ticket_detail_dto.dart';
 import '../dtos/ticket_type_dto.dart';
+import '../dtos/ticket_user_dto.dart';
 
 part 'ticket_event.dart';
 part 'ticket_state.dart';
@@ -22,6 +23,8 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
     on<TicketPurchase>(_onTicketPurchase);
     on<TicketCheckIn>(_onTicketCheckIn);
     on<TicketDetailFetch>(_onTicketDetailFetch);
+    on<TicketBuyerFetch>(_onTicketBuyerFetch);
+    on<TicketCheckInFetch>(_onTicketCheckInFetch);
   }
 
   Future<void> _onTicketTypeFetch(TicketTypeFetch event, Emitter<TicketState> emit) async {
@@ -56,6 +59,24 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
     return (switch (result) {
       Success() => emit(TicketDetailFetchSuccess(ticketDetails: result.data)),
       Failure() => emit(TicketDetailFetchFailure(result.message)),
+    });
+  }
+
+  Future<void> _onTicketBuyerFetch(TicketBuyerFetch event, Emitter<TicketState> emit) async {
+    emit(TicketBuyerFetching());
+    final result = await ticketRepository.getTicketBuyers(eventId: event.eventId, page: event.page, size: event.size);
+    return (switch (result) {
+      Success() => emit(TicketBuyerFetchSuccess(ticketBuyers: result.data)),
+      Failure() => emit(TicketBuyerFetchFailure(result.message)),
+    });
+  }
+
+  Future<void> _onTicketCheckInFetch(TicketCheckInFetch event, Emitter<TicketState> emit) async {
+    emit(TicketCheckInFetching());
+    final result = await ticketRepository.getTicketCheckIns(eventId: event.eventId, page: event.page, size: event.size);
+    return (switch (result) {
+      Success() => emit(TicketCheckInFetchSuccess(ticketCheckIns: result.data)),
+      Failure() => emit(TicketCheckInFetchFailure(result.message)),
     });
   }
 }
