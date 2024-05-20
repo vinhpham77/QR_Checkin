@@ -63,13 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(),
               const Center(
                   child: Text('Tính năng sắp ra mắt', style: TextStyle(fontSize: 24))),
-              Center(
-                  child: QrImageView(
-                data: QrEvent(isTicketSeller: false, eventId: 1, code: '123')
-                    .toString(),
-                size: 200,
-                padding: const EdgeInsets.all(16),
-              )),
+              const Center(
+                  child: Text('Tính năng sắp ra mắt', style: TextStyle(fontSize: 24))),
             ],
           ),
           floatingActionButton: const EventCreateButton(),
