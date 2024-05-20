@@ -30,11 +30,13 @@ class AuthRegisterStarted extends AuthEvent {
   final String username;
   final String password;
   final String email;
+  final String idNo;
 
   AuthRegisterStarted({
     required this.username,
     required this.password,
     required this.email,
+    required this.idNo,
   });
 }
 

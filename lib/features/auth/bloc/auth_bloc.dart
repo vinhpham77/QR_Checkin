@@ -47,7 +47,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthRegisterStarted event, Emitter<AuthState> emit) async {
     emit(AuthRegisterInProgress());
     final result = await authRepository.register(
-        username: event.username, password: event.password, email: event.email);
+        username: event.username, password: event.password, email: event.email, idNo: event.idNo);
     return (switch (result) {
       Success() => emit(AuthRegisterSuccess()),
       Failure() => emit(AuthRegisterFailure(result.message)),

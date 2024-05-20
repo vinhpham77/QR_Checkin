@@ -44,13 +44,15 @@ class AuthRepository {
     return Success(null);
   }
 
-  Future<Result<void>> register(
-      {required String username,
-      required String password,
-      required String email}) async {
+  Future<Result<void>> register({
+    required String username,
+    required String password,
+    required String email,
+    required String idNo,
+  }) async {
     try {
       await authApiClient.register(
-        RegisterDto(username: username, password: password, email: email),
+        RegisterDto(username: username, password: password, email: email, idNo: idNo),
       );
     } on Exception catch (e) {
       log('$e');

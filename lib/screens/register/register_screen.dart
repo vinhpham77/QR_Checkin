@@ -27,6 +27,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController(text: '');
   final _repeatPasswordController = TextEditingController(text: '');
   final _emailController = TextEditingController(text: '');
+  final _idCardController = TextEditingController(text: '');
+  final _idCardFocusNode = FocusNode();
+  final _idCardKey = GlobalKey<FormFieldState>();
   bool _passwordVisible = false;
   bool _repeatPasswordVisible = false;
   final _usernameFocusNode = FocusNode();
@@ -37,6 +40,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
+    _passwordController.clear();
+    _repeatPasswordController.clear();
+    _emailController.clear();
+    _idCardController.clear();
+
     _usernameFocusNode.addListener(() {
       if (!_usernameFocusNode.hasFocus) {
         _usernameKey.currentState!.validate();
@@ -124,7 +132,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             AuthRegisterStarted(
                 username: _usernameController.text,
                 password: _passwordController.text,
-                email: _emailController.text),
+                email: _emailController.text,
+                idNo: _idCardController.text),
           );
     }
   }
@@ -168,45 +177,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   return 'Vui lòng nhập tên đăng nhập';
                 } else if (value.length < 6) {
                   return 'Tên đăng nhập phải có ít nhất 6 ký tự';
-                }
-
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
-            TextFormField(
-              controller: _emailController,
-              key: _emailKey,
-              focusNode: _emailFocusNode,
-              keyboardType: TextInputType.emailAddress,
-              maxLength: 50,
-              buildCounter: (context,
-                      {required currentLength,
-                      required isFocused,
-                      maxLength}) =>
-                  null,
-              autofillHints: const [AutofillHints.email],
-              onEditingComplete: () {
-                if (_emailKey.currentState!.validate()) {
-                  _passwordFocusNode.requestFocus();
-                }
-              },
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                filled: true,
-                prefixIcon: Icon(Icons.email),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Vui lòng nhập email';
-                }
-
-                var emailPattern = RegExp(
-                  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-                );
-
-                if (!emailPattern.hasMatch(value)) {
-                  return 'Email không hợp lệ';
                 }
 
                 return null;
@@ -271,10 +241,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       required isFocused,
                       maxLength}) =>
                   null,
-              keyboardType: TextInputType.visiblePassword,
               onEditingComplete: () {
-                _handleSubmit(context);
+                if (_repeatPasswordKey.currentState!.validate()) {
+                  _emailFocusNode.requestFocus();
+                }
               },
+              keyboardType: TextInputType.visiblePassword,
               decoration: InputDecoration(
                 labelText: 'Nhập lại mật khẩu',
                 filled: true,
@@ -298,6 +270,83 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 if (value != _passwordController.text) {
                   return 'Mật khẩu nhập lại không khớp với mật khẩu trên';
+                }
+
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            TextFormField(
+              controller: _emailController,
+              key: _emailKey,
+              focusNode: _emailFocusNode,
+              keyboardType: TextInputType.emailAddress,
+              maxLength: 50,
+              buildCounter: (context,
+                  {required currentLength,
+                    required isFocused,
+                    maxLength}) =>
+              null,
+              autofillHints: const [AutofillHints.email],
+              onEditingComplete: () {
+                if (_emailKey.currentState!.validate()) {
+                  _idCardFocusNode.requestFocus();
+                }
+              },
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                filled: true,
+                prefixIcon: Icon(Icons.email),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Vui lòng nhập email';
+                }
+
+                var emailPattern = RegExp(
+                  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                );
+
+                if (!emailPattern.hasMatch(value)) {
+                  return 'Email không hợp lệ';
+                }
+
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            TextFormField(
+              controller: _idCardController,
+              focusNode: _idCardFocusNode,
+              key: _idCardKey,
+              keyboardType: TextInputType.number,
+              maxLength: 12,
+              buildCounter: (context,
+                  {required currentLength,
+                    required isFocused,
+                    maxLength}) =>
+              null,
+              onEditingComplete: () {
+                if (_idCardKey.currentState!.validate()) {
+                  _handleSubmit(context);
+                }
+              },
+              decoration: const InputDecoration(
+                labelText: 'CMND/CCCD',
+                filled: true,
+                prefixIcon: Icon(Icons.email),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Vui lòng nhập CMND/CCCD';
+                }
+
+                if (value.length != 9 && value.length != 12) {
+                  return 'CMND/CCCD không hợp lệ';
+                }
+
+                if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                  return 'CMND/CCCD không hợp lệ';
                 }
 
                 return null;
@@ -382,6 +431,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _passwordController.dispose();
     _repeatPasswordController.dispose();
     _emailController.dispose();
+    _idCardController.dispose();
+    _idCardFocusNode.dispose();
     _usernameFocusNode.dispose();
     _emailFocusNode.dispose();
     _passwordFocusNode.dispose();
