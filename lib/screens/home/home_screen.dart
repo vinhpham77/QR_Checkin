@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/config/theme.dart';
-import 'package:qr_checkin/features/qr_event.dart';
 import 'package:qr_checkin/screens/events/events_screen.dart';
 import 'package:qr_checkin/screens/history/history_screen.dart';
 import 'package:qr_checkin/utils/theme_ext.dart';
 import 'package:qr_checkin/widgets/main_qr_button.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../config/router.dart';
 import '../../features/auth/bloc/auth_bloc.dart';
@@ -62,9 +60,11 @@ class _HomeScreenState extends State<HomeScreen> {
               const HistoryScreen(),
               Container(),
               const Center(
-                  child: Text('Tính năng sắp ra mắt', style: TextStyle(fontSize: 24))),
+                  child: Text('Tính năng sắp ra mắt',
+                      style: TextStyle(fontSize: 24))),
               const Center(
-                  child: Text('Tính năng sắp ra mắt', style: TextStyle(fontSize: 24))),
+                  child: Text('Tính năng sắp ra mắt',
+                      style: TextStyle(fontSize: 24))),
             ],
           ),
           floatingActionButton: const EventCreateButton(),

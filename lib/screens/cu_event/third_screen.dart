@@ -20,8 +20,8 @@ class ThirdScreenState extends State<ThirdScreen> {
   late bool regisRequired;
   late bool approvalRequired;
   late bool captureRequired;
-  late String checkinQrCode;
-  late String? checkoutQrCode;
+  late String checkinSecretKey;
+  late String? checkoutSecretKey;
   late int? slots;
   final _formKey = GlobalKey<FormState>();
 
@@ -41,8 +41,8 @@ class ThirdScreenState extends State<ThirdScreen> {
     regisRequired = widget.event.regisRequired;
     approvalRequired = widget.event.approvalRequired;
     captureRequired = widget.event.captureRequired;
-    checkinQrCode = widget.event.checkinQrCode;
-    checkoutQrCode = widget.event.checkoutQrCode;
+    checkinSecretKey = widget.event.checkinSecretKey;
+    checkoutSecretKey = widget.event.checkoutSecretKey;
     slots = widget.event.slots;
     _slotsController = TextEditingController(text: slots?.toString());
   }
@@ -76,10 +76,10 @@ class ThirdScreenState extends State<ThirdScreen> {
               Text('Yêu cầu check out', style: themeData.textTheme.bodyMedium!),
               // Switch
               Switch(
-                value: checkoutQrCode != null,
+                value: checkoutSecretKey != null,
                 onChanged: (value) {
                   setState(() {
-                    checkoutQrCode = value ? 'checkout' : null;
+                    checkoutSecretKey = value ? 'checkout' : null;
                   });
                 },
               ),

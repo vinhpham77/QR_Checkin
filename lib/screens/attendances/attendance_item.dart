@@ -149,7 +149,7 @@ class _AttendanceItemState extends State<AttendanceItem> {
                                       Image.network(
                                         getImageUrl(widget
                                             .attendanceUser.qrCheckInImg!),
-                                        width: 100,
+                                        width: 160,
                                         errorBuilder:
                                             (context, error, stackTrace) {
                                           return Image.asset(
@@ -178,7 +178,7 @@ class _AttendanceItemState extends State<AttendanceItem> {
                                       Image.network(
                                         getImageUrl(
                                             widget.attendanceUser.checkInImg),
-                                        width: 140,
+                                        width: 160,
                                         errorBuilder:
                                             (context, error, stackTrace) {
                                           return Image.asset(
@@ -268,7 +268,7 @@ class _AttendanceItemState extends State<AttendanceItem> {
                                         Image.network(
                                           getImageUrl(widget
                                               .attendanceUser.checkOutImg),
-                                          width: 140,
+                                          width: 160,
                                           errorBuilder:
                                               (context, error, stackTrace) {
                                             return Image.asset(

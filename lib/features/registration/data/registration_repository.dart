@@ -13,11 +13,11 @@ class RegistrationRepository {
 
   RegistrationRepository(this.registrationApiClient);
 
-  Future<Result<ItemCounterDto<RegistrationDetailDto>>> getTicketDetails(
+  Future<Result<ItemCounterDto<RegistrationDetailDto>>> getRegistrationDetails(
       {int page = 1, int size = 10}) async {
     try {
       final ticketDetails =
-          await registrationApiClient.getTicketDetails(page: page, size: size);
+          await registrationApiClient.getRegistrationDetails(page: page, size: size);
       return Success(ticketDetails);
     } on Exception catch (e) {
       log('$e');

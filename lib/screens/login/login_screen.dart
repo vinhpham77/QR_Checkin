@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/config/theme.dart';
 import 'package:qr_checkin/utils/data_utils.dart';
 import 'package:qr_checkin/utils/theme_ext.dart';
@@ -58,31 +57,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = context.watch<AuthBloc>().state;
-
-    var loginWidget = (switch (authState) {
-      AuthLoginInitial() => _buildInitialLoginWidget(),
-      AuthAuthenticateUnauthenticated() => _buildInitialLoginWidget(),
-      AuthLoginInProgress() => _buildInProgressLoginWidget(),
-      AuthLoginFailure(message: final msg) => _buildFailureLoginWidget(msg),
-      _ => _buildInitialLoginWidget(),
-    });
-
-    loginWidget = BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          switch (state) {
-            case AuthLoginSuccess():
-              context.read<AuthBloc>().add(AuthAuthenticateStarted());
-              break;
-            case AuthAuthenticateSuccess(token: final jwt):
-              setUserInfo(jwt);
-              context.go(RouteName.home);
-              break;
-            default:
-          }
-        },
-        child: loginWidget);
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SingleChildScrollViewWithColumn(
@@ -104,7 +78,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: context.color.surface,
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: loginWidget,
+                child: BlocListener<AuthBloc, AuthState>(
+                    listener: (context, state) {
+                  switch (state) {
+                    case AuthLoginSuccess():
+                      context.read<AuthBloc>().add(AuthAuthenticateStarted());
+                      break;
+                    case AuthAuthenticateSuccess(token: final jwt):
+                      setUserInfo(jwt);
+                      router.pushReplacement(RouteName.home);
+                      break;
+                    default:
+                  }
+                }, child: BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    if (state is AuthAuthenticateFailure) {
+                      return _buildInitialLoginWidget();
+                    } else if (state is AuthLoginInProgress) {
+                      return _buildInProgressLoginWidget();
+                    } else {
+                      return _buildInitialLoginWidget();
+                    }
+                  },
+                )),
               ),
             ),
           ],
@@ -138,7 +134,6 @@ class _LoginScreenState extends State<LoginScreen> {
               controller: _usernameController,
               key: _usernameKey,
               focusNode: _usernameFocusNode,
-              autofocus: true,
               onEditingComplete: () {
                 if (_usernameKey.currentState!.validate()) {
                   _passwordFocusNode.requestFocus();
@@ -225,7 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
             TextButton(
               onPressed: () {
                 context.read<AuthBloc>().add(AuthRegisterInitiated());
-                context.go(RouteName.register);
+                router.pushReplacement(RouteName.register);
               },
               child: Text('Chưa có tài khoản? Đăng ký ngay!',
                   textAlign: TextAlign.center,

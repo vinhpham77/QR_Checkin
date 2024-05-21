@@ -37,10 +37,13 @@ class AuthApiClient {
 
   Future<void> register(RegisterDto registerDto) async {
     try {
+      var interceptors = [...dio.interceptors];
+      dio.interceptors.clear();
       await dio.post(
         '${servicePaths['auth']}/register',
         data: registerDto.toJson(),
       );
+      dio.interceptors.addAll(interceptors);
     } on DioException catch (e) {
       if (e.response != null && e.response!.data != null) {
         throw Exception(e.response!.data['message']);

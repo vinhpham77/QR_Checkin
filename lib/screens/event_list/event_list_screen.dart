@@ -141,8 +141,8 @@ class _EventListScreenState extends State<EventListScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >
-        0.7 * _scrollController.position.maxScrollExtent) {
+    if (_scrollController.position.pixels ==
+         _scrollController.position.maxScrollExtent) {
       if (!isLastPage) {
         page++;
         eventBloc.add(EventFetch(

@@ -843,7 +843,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     },
                     child: const Text('Mã check in'),
                   ),
-                  if (event.checkoutQrCode != null)
+                  if (event.checkoutSecretKey != null)
                     ElevatedButton(
                       onPressed: () {
                         Navigator.of(context).pop();

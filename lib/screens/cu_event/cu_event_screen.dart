@@ -56,7 +56,8 @@ class _CuEventScreenState extends State<CuEventScreen> {
           bloc: eventBloc,
           listener: (context, state) {
             if (state is EventCreated) {
-              context.pushReplacement(RouteName.eventDetail, extra: state.event.id);
+              context.pushReplacement(RouteName.eventDetail,
+                  extra: state.event.id);
             }
           },
           child: BlocBuilder<EventBloc, EventState>(
@@ -84,31 +85,13 @@ class _CuEventScreenState extends State<CuEventScreen> {
                   eventBloc.add(EventPrefilled(event: EventDto.empty()));
                 }
                 return const Center(child: CircularProgressIndicator());
-              }  else if (state is EventCreateFailure) {
+              } else if (state is EventCreateFailure) {
                 return _buildFailureStack(context, state.message);
               } else if (state is EventUpdateFailure) {
                 return _buildFailureStack(context, state.message);
               }
 
               return _buildStepper(event);
-
-              // return (switch (state) {
-              //   EventInitial() =>
-              //     const Center(child: CircularProgressIndicator()),
-              //   EventFetchOneLoading() =>
-              //     const Center(child: CircularProgressIndicator()),
-              //   EventFetchOneSuccess(event: final eventDto) =>
-              //     _buildStepper(),
-              //   EventFetchOneFailure(message: final msg) =>
-              //     _buildTryAgainModal(msg, context),
-              //   EventCreating() => _buildOperationInProgress(),
-              //   EventUpdating() => _buildOperationInProgress(),
-              //   EventCreateFailure(message: final msg) =>
-              //     _buildFailureStack(context, msg),
-              //   EventUpdateFailure(message: final msg) =>
-              //     _buildFailureStack(context, msg),
-              //   _ => _buildStepper(),
-              // });
             },
           ),
         ),
@@ -301,8 +284,8 @@ class _CuEventScreenState extends State<CuEventScreen> {
       isTicketSeller: thirdScreen.isTicketSeller,
       ticketTypes: thirdScreen.ticketTypes,
       categories: firstScreen.selectedCategories,
-      checkinQrCode: thirdScreen.checkinQrCode,
-      checkoutQrCode: thirdScreen.checkoutQrCode,
+      checkinSecretKey: thirdScreen.checkinSecretKey,
+      checkoutSecretKey: thirdScreen.checkoutSecretKey,
       regisRequired: thirdScreen.regisRequired,
       approvalRequired: thirdScreen.approvalRequired,
       captureRequired: thirdScreen.captureRequired,

@@ -72,30 +72,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = context.watch<AuthBloc>().state;
-
-    var registerWidget = (switch (authState) {
-      AuthRegisterInitial() => _buildInitialRegisterWidget(),
-      AuthAuthenticateUnauthenticated() => _buildInitialRegisterWidget(),
-      AuthRegisterInProgress() => _buildInProgressRegisterWidget(),
-      AuthRegisterFailure(message: final msg) =>
-        _buildFailureRegisterWidget(msg),
-      _ => _buildInitialRegisterWidget(),
-    });
-
-    registerWidget = BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is AuthRegisterSuccess) {
-          context.go(RouteName.login);
-          context.read<AuthBloc>().add(AuthLoginPrefilled(
-                username: _usernameController.text,
-                password: '',
-              ));
-        }
-      },
-      child: registerWidget,
-    );
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SingleChildScrollViewWithColumn(
@@ -117,7 +93,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: context.color.surface,
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: registerWidget,
+                child: BlocListener<AuthBloc, AuthState>(
+                  listener: (context, state) {
+                    if (state is AuthRegisterSuccess) {
+                      context.go(RouteName.login);
+                      context.read<AuthBloc>().add(AuthLoginPrefilled(
+                        username: _usernameController.text,
+                        password: '',
+                      ));
+                    }
+                  },
+                  child: BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      if (state is AuthRegisterFailure) {
+                        return _buildFailureRegisterWidget(state.message);
+                      } else if (state is AuthRegisterInProgress) {
+                        return _buildInProgressRegisterWidget();
+                      } else {
+                        return _buildInitialRegisterWidget();
+                      }
+                    },
+                  ),
+                )
               ),
             ),
           ],
@@ -163,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   null,
               onEditingComplete: () {
                 if (_usernameKey.currentState!.validate()) {
-                  _emailFocusNode.requestFocus();
+                  _passwordFocusNode.requestFocus();
                 }
               },
               autofillHints: const [AutofillHints.username],
@@ -182,7 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             TextFormField(
               key: _passwordKey,
               focusNode: _passwordFocusNode,
@@ -230,7 +227,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             TextFormField(
               controller: _repeatPasswordController,
               focusNode: _repeatPasswordFocusNode,
@@ -275,7 +272,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             TextFormField(
               controller: _emailController,
               key: _emailKey,
@@ -314,7 +311,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             TextFormField(
               controller: _idCardController,
               focusNode: _idCardFocusNode,
@@ -352,7 +349,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 return null;
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             FilledButton.icon(
               onPressed: () {
                 _handleSubmit(context);
@@ -370,7 +367,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       username: '',
                       password: '',
                     ));
-                context.go(RouteName.login);
+                router.pushReplacement(RouteName.login);
               },
               child: Text('Đã có tài khoản? Quay lại đăng nhập',
                   textAlign: TextAlign.center, style: context.text.bodyMedium!.copyWith(
@@ -413,7 +410,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             color: context.color.error,
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 20),
         FilledButton.icon(
           onPressed: () {
             _handleRetry(context);

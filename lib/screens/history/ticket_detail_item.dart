@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/features/ticket/dtos/ticket_detail_dto.dart';
@@ -74,41 +75,45 @@ class _TicketDetailItemState extends State<TicketDetailItem> {
                 const SizedBox(
                   width: 16,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.ticketDetail.eventName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.ticketDetail.eventName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    Text(
-                      'Loại vé: ${widget.ticketDetail.ticketTypeName}',
-                      style: const TextStyle(
-                        fontSize: 14,
+                      Text(
+                        'Loại vé: ${widget.ticketDetail.ticketTypeName}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Giá: ${formatPrice(widget.ticketDetail.price)}',
-                      style: const TextStyle(
-                        fontSize: 14,
+                      Text(
+                        'Giá: ${formatPrice(widget.ticketDetail.price)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    Text(
-                      widget.ticketDetail.checkInAt == null ? 'Chưa sử dụng' : 'Check in: ${formatDateTime(widget.ticketDetail.checkInAt!)}',
-                      style: const TextStyle(
-                        fontSize: 14,
+                      Text(
+                        widget.ticketDetail.checkInAt == null ? 'Chưa sử dụng' : 'Check in: ${formatDateTime(widget.ticketDetail.checkInAt!)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Địa điểm: ${widget.ticketDetail.location}',
-                      style: const TextStyle(
-                        fontSize: 14,
+                      Text(
+                        'Địa điểm: ${widget.ticketDetail.location}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 )
               ],
             ),

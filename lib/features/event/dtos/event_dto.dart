@@ -22,8 +22,8 @@ class EventDto {
   bool approvalRequired;
   bool captureRequired;
   List<CategoryDto> categories;
-  String checkinQrCode;
-  String? checkoutQrCode;
+  String checkinSecretKey;
+  String? checkoutSecretKey;
   DateTime createdAt;
   String createdBy;
   DateTime updatedAt;
@@ -50,8 +50,8 @@ class EventDto {
     this.regisRequired = false,
     this.approvalRequired = false,
     this.captureRequired = false,
-    required this.checkinQrCode,
-    this.checkoutQrCode,
+    required this.checkinSecretKey,
+    this.checkoutSecretKey,
     this.categories = const [],
     required this.createdAt,
     required this.createdBy,
@@ -89,8 +89,8 @@ class EventDto {
               .map((e) => CategoryDto.fromJson(e))
               .toList()
           : [],
-      checkinQrCode: json['checkinQrCode'] ?? '',
-      checkoutQrCode: json['checkoutQrCode'],
+      checkinSecretKey: json['checkinSecretKey'] ?? '',
+      checkoutSecretKey: json['checkoutSecretKey'],
       createdAt: DateTime.parse(json['createdAt']).toLocal(),
       createdBy: json['createdBy'],
       updatedAt: DateTime.parse(json['updatedAt']).toLocal(),
@@ -115,7 +115,7 @@ class EventDto {
       ),
       latitude: 0,
       longitude: 0,
-      checkinQrCode: '',
+      checkinSecretKey: '',
       createdAt: DateTime.now(),
       createdBy: '',
       updatedAt: DateTime.now(),
@@ -142,7 +142,7 @@ class EventDto {
       'approvalRequired': approvalRequired,
       'captureRequired': captureRequired,
       'categories': categories.map((e) => e.toJson()).toList(),
-      'checkoutQrCode': checkoutQrCode,
+      'checkoutSecretKey': checkoutSecretKey,
       'createdAt': createdAt.toIso8601String(),
       'createdBy': createdBy,
       'updatedAt': updatedAt.toIso8601String(),
@@ -170,8 +170,8 @@ class EventDto {
     bool? approvalRequired,
     bool? captureRequired,
     List<CategoryDto>? categories,
-    String? checkinQrCode,
-    String? checkoutQrCode,
+    String? checkinSecretKey,
+    String? checkoutSecretKey,
     DateTime? createdAt,
     List<TicketTypeDto>? ticketTypes,
     String? createdBy,
@@ -201,8 +201,8 @@ class EventDto {
       approvalRequired: approvalRequired ?? this.approvalRequired,
       captureRequired: captureRequired ?? this.captureRequired,
       categories: categories ?? this.categories,
-      checkinQrCode: checkinQrCode ?? this.checkinQrCode,
-      checkoutQrCode: checkoutQrCode ?? this.checkoutQrCode,
+      checkinSecretKey: checkinSecretKey ?? this.checkinSecretKey,
+      checkoutSecretKey: checkoutSecretKey ?? this.checkoutSecretKey,
       createdAt: createdAt ?? this.createdAt,
       createdBy: createdBy ?? this.createdBy,
       updatedAt: updatedAt ?? this.updatedAt,

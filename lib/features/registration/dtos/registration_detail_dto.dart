@@ -18,6 +18,7 @@ class RegistrationDetailDto {
     required this.createdAt,
     required this.checkInAt,
     required this.eventId,
+    required this.acceptedAt,
     required this.eventName,
     required this.eventLocation,
     required this.checkOutRequired,
@@ -32,6 +33,7 @@ class RegistrationDetailDto {
       eventId: json['eventId'],
       eventName: json['eventName'],
       eventLocation: json['eventLocation'],
+      acceptedAt: tryParseDateTime(json['acceptedAt']),
       checkOutRequired: json['checkOutRequired'],
     );
   }

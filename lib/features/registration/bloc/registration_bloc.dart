@@ -19,7 +19,7 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
   RegistrationBloc({required this.registrationRepository})
       : super(RegistrationInitial()) {
     on<RegistrationEventInitial>((event, emit) => emit(RegistrationInitial()));
-    on<RegistrationDetailFetch>(_onTicketDetailFetch);
+    on<RegistrationDetailFetch>(_onRegistrationDetailFetch);
     on<AttendanceFetch>(_onAttendanceFetch);
     on<AcceptedRegistrationFetch>(_onAcceptedRegistrationFetch);
     on<PendingRegistrationFetch>(_onPendingRegistrationFetch);
@@ -27,10 +27,10 @@ class RegistrationBloc extends Bloc<RegistrationEvent, RegistrationState> {
     on<RejectRegistration>(_onRejectRegistration);
   }
 
-  Future<void> _onTicketDetailFetch(
+  Future<void> _onRegistrationDetailFetch(
       RegistrationDetailFetch event, Emitter<RegistrationState> emit) async {
     emit(RegistrationDetailFetching());
-    final result = await registrationRepository.getTicketDetails(
+    final result = await registrationRepository.getRegistrationDetails(
         page: event.page, size: event.size);
     return (switch (result) {
       Success() =>

@@ -107,6 +107,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                           backgroundColor: Colors.red,
                         ),
                       );
+                      Navigator.of(context).pop();
                     }
                   } else if (state.eventDto.captureRequired) {
                     context.push(RouteName.eventCapture, extra: {
@@ -147,14 +148,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             child: BlocListener<TicketBloc, TicketState>(
               listener: (context, state) {
                 if (state is TicketCheckInSuccess) {
-                  Navigator.of(context).pop();
+                  router.pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Check in thành công'),
                       backgroundColor: Colors.green,
                     ),
                   );
-                  Navigator.of(context).pop();
+                  router.pop();
                 } else if (state is TicketCheckInFailure) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(

@@ -70,42 +70,46 @@ class _RegistrationItemState extends State<RegistrationItem> {
             const SizedBox(
               width: 16,
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.registrationDetail.eventName,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  'Xét duyệt: ${widget.registrationDetail.acceptedAt != null ? 'Đã duyệt' : 'Chưa duyệt'}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                  ),
-                ),
-                Text(
-                  'Check in: ${widget.registrationDetail.checkInAt != null ? formatDateTime(widget.registrationDetail.checkInAt!) : 'Chưa'}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                  ),
-                ),
-                if (widget.registrationDetail.checkOutRequired)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'Check out: ${widget.registrationDetail.checkOutAt != null ? formatDateTime(widget.registrationDetail.checkOutAt!) : 'Chưa'}',
+                    widget.registrationDetail.eventName,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    'Xét duyệt: ${widget.registrationDetail.acceptedAt != null ? 'Đã duyệt' : 'Chưa duyệt'}',
                     style: const TextStyle(
                       fontSize: 14,
                     ),
                   ),
-                Text(
-                  'Địa điểm: ${widget.registrationDetail.eventLocation}',
-                  style: const TextStyle(
-                    fontSize: 14,
+                  Text(
+                    'Check in: ${widget.registrationDetail.checkInAt != null ? formatDateTime(widget.registrationDetail.checkInAt!) : 'Chưa'}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                    ),
                   ),
-                ),
-              ],
+                  if (widget.registrationDetail.checkOutRequired)
+                    Text(
+                      'Check out: ${widget.registrationDetail.checkOutAt != null ? formatDateTime(widget.registrationDetail.checkOutAt!) : 'Chưa'}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  Text(
+                    'Địa điểm: ${widget.registrationDetail.eventLocation}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             )
           ],
         ),

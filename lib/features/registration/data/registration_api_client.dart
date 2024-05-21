@@ -10,7 +10,7 @@ class RegistrationApiClient {
 
   RegistrationApiClient(this.dio);
 
-  Future<ItemCounterDto<RegistrationDetailDto>> getTicketDetails({
+  Future<ItemCounterDto<RegistrationDetailDto>> getRegistrationDetails({
     page = 1,
     size = 10,
   }) async {
