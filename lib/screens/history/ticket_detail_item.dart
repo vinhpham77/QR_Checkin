@@ -153,7 +153,7 @@ class _TicketDetailItemState extends State<TicketDetailItem> {
                             QrImageView(
                                 errorCorrectionLevel: QrErrorCorrectLevel.M,
                                 size: 240,
-                                version: 10,
+                                version: QrVersions.auto,
                                 data: QrEvent(
                                   isTicketSeller: true,
                                   eventId: widget.ticketDetail.eventId,

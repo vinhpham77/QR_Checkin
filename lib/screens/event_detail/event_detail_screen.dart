@@ -967,7 +967,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         : QrImageView(
                             errorCorrectionLevel: QrErrorCorrectLevel.M,
                             size: 200,
-                            version: 10,
+                            version: QrVersions.auto,
                             data: QrEvent(
                               isTicketSeller: event.isTicketSeller,
                               eventId: event.id,
