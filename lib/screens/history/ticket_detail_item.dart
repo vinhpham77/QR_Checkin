@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:qr_checkin/features/ticket/dtos/ticket_detail_dto.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -102,7 +100,9 @@ class _TicketDetailItemState extends State<TicketDetailItem> {
                           ),
                         ),
                         Text(
-                          widget.ticketDetail.checkInAt == null ? 'Chưa sử dụng' : 'Check in: ${formatDateTime(widget.ticketDetail.checkInAt!)}',
+                          widget.ticketDetail.checkInAt == null
+                              ? 'Chưa sử dụng'
+                              : 'Check in: ${formatDateTime(widget.ticketDetail.checkInAt!)}',
                           style: const TextStyle(
                             fontSize: 14,
                           ),
@@ -133,9 +133,9 @@ class _TicketDetailItemState extends State<TicketDetailItem> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const SizedBox(height: 4),
-                            const Text(
-                              'Mã QR',
-                              style: TextStyle(
+                            Text(
+                              'Vé ${widget.ticketDetail.ticketTypeName}',
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),

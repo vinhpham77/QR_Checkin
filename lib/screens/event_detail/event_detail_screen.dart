@@ -946,7 +946,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return AbsorbPointer(
       absorbing: !absorb,
       child: Container(
-        color: AppColors.black.withOpacity(0.4),
+        color: AppColors.black.withOpacity(0.7),
         child: AlertDialog(
           title: Text(isCheckIn ? 'Mã check in' : 'Mã check out'),
           content: SizedBox(
@@ -963,10 +963,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 const SizedBox(height: 16),
                 Center(
                     child: isGenerating || code == ''
-                        ? const CircularProgressIndicator()
+                        ? Container(
+                            padding: const EdgeInsets.symmetric(vertical: 102),
+                            child: const CircularProgressIndicator())
                         : QrImageView(
                             errorCorrectionLevel: QrErrorCorrectLevel.M,
-                            size: 200,
+                            size: 240,
                             version: QrVersions.auto,
                             data: QrEvent(
                               isTicketSeller: event.isTicketSeller,

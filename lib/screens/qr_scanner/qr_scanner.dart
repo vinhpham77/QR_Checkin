@@ -155,6 +155,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                       backgroundColor: Colors.green,
                     ),
                   );
+                  Navigator.of(context).pop();
                   router.pop();
                 } else if (state is TicketCheckInFailure) {
                   Navigator.of(context).pop();
@@ -164,6 +165,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                       backgroundColor: Colors.red,
                     ),
                   );
+                  Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 }
               },
@@ -210,38 +212,36 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                               Navigator.of(context).pop();
                               showDialog(
                                   context: context,
-                                  builder: (context) => AlertDialog(
-                                        title: const Text('Lỗi'),
-                                        content: Column(children: [
-                                          const Text('Mã QR không hợp lệ'),
-                                          FilledButton(
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                                setState(() {
-                                                  qrEvent = null;
-                                                });
-                                                cameraController.start();
-                                              },
-                                              child: const Text('Thử lại'))
-                                        ]),
+                                  builder: (context) => Dialog(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(16),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Text('Lỗi',
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      fontSize: 18)),
+                                              const SizedBox(height: 16),
+                                              const Text(
+                                                  'Mã QR không hợp lệ',
+                                                  style:
+                                                      TextStyle(fontSize: 16)),
+                                              const SizedBox(height: 16),
+                                              FilledButton(
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                    cameraController.start();
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                  child:
+                                                      const Text('Thử lại'))
+                                            ],
+                                          ),
+                                        ),
                                       ));
                             }
-                          } else {
-                            Navigator.of(context).pop();
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                      title: const Text('Lỗi'),
-                                      content: Column(children: [
-                                        const Text('Mã QR không hợp lệ'),
-                                        FilledButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                              cameraController.start();
-                                            },
-                                            child: const Text('Thử lại'))
-                                      ]),
-                                    ));
                           }
                         }
 
