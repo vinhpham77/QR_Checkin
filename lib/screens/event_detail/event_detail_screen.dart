@@ -16,6 +16,8 @@ import '../../config/router.dart';
 import '../../config/theme.dart';
 import '../../config/user_info.dart';
 import '../../features/event/bloc/event_bloc.dart';
+import '../../features/event/data/event_api_client.dart';
+import '../../features/event/data/event_repository.dart';
 import '../../features/event/dtos/event_dto.dart';
 import '../../features/qr_event.dart';
 import '../../features/ticket/bloc/ticket_bloc.dart';
@@ -39,6 +41,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   late GoogleMapController mapController;
   EventDto event = EventDto.empty();
   String code = '';
+  final eventBloc = EventBloc(EventRepository(EventApiClient(dio)));
   final ticketBloc = TicketBloc(
       ticketRepository: TicketRepository(TicketApiClient(dio)),
       ticketTypeRepository: TicketTypeRepository(TicketTypeApiClient(dio)));
@@ -54,7 +57,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   void initState() {
     super.initState();
     countdownController = StreamController<int>.broadcast();
-    context.read<EventBloc>().add(EventFetchOne(id: widget.eventId));
+    eventBloc.add(EventFetchOne(id: widget.eventId));
   }
 
   @override
@@ -65,6 +68,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             create: (context) => ticketBloc..add(TicketEventInitial())),
       ],
       child: BlocListener<EventBloc, EventState>(
+        bloc: eventBloc,
         listener: (context, state) {
           if (state is EventFetchOneFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -101,6 +105,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           }
         },
         child: BlocBuilder<EventBloc, EventState>(
+          bloc: eventBloc,
           builder: (context, state) {
             if (state is EventInitial) {
               return const Center(child: CircularProgressIndicator());
@@ -176,8 +181,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              TextField(
-                                decoration: const InputDecoration(
+                              const TextField(
+                                decoration: InputDecoration(
                                   filled: true,
                                   hintText: 'Nhập nội dung báo cáo',
                                 ),
@@ -257,8 +262,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   if (loadingProgress == null) {
                     return child;
                   } else {
-                    return const Center(
-                      child: CircularProgressIndicator(),
+                    return Container(
+                      margin: const EdgeInsets.only(top: 20),
+                      child: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
                     );
                   }
                 },
@@ -521,7 +529,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(AppSizes.fieldRadius),
-                      child: GoogleMap(
+                      child: event.latitude == 0 ? Container(
+                        alignment: Alignment.center,
+                        child: const CircularProgressIndicator(),
+                      ) :GoogleMap(
                         gestureRecognizers: <Factory<
                             OneSequenceGestureRecognizer>>{
                           Factory<OneSequenceGestureRecognizer>(

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -35,7 +37,7 @@ class _EventListScreenState extends State<EventListScreen> {
   @override
   void initState() {
     super.initState();
-    key = DateTime.now().millisecondsSinceEpoch.toString();
+    key = Random().toString();
     _scrollController.addListener(_onScroll);
   }
 
@@ -82,6 +84,7 @@ class _EventListScreenState extends State<EventListScreen> {
           key: key,
         )),
         child: BlocListener<EventBloc, EventState>(
+          bloc: eventBloc,
           listener: (context, state) {
             if (state is EventFetchFailure) {
               ScaffoldMessenger.of(context)
@@ -89,6 +92,7 @@ class _EventListScreenState extends State<EventListScreen> {
             }
           },
           child: BlocBuilder<EventBloc, EventState>(
+            bloc: eventBloc,
             builder: (context, state) {
               if (state is EventFetchSuccess && state.key == key) {
                 _events.addAll(state.events.items);

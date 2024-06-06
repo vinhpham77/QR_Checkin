@@ -179,7 +179,9 @@ class SecondScreenState extends State<SecondScreen> {
               border: Border.all(color: AppColors.black, width: 1),
             ),
             height: 400,
-            child: GMap(
+            child: _latLng.latitude == 0 ? const Center(
+              child: CircularProgressIndicator(),
+            ) : GMap(
               radius: double.tryParse(_radiusController.text) ?? 20,
               latLng: _latLng,
               onLocationChanged: (latLng) {

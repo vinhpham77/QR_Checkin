@@ -108,7 +108,7 @@ class Event extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Container(
+                SizedBox(
                   width: 200,
                   child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,

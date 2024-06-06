@@ -96,7 +96,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       return _buildInitialLoginWidget();
                     } else if (state is AuthLoginInProgress) {
                       return _buildInProgressLoginWidget();
-                    } else {
+                    } else if (state is AuthLoginFailure) {
+                      return _buildFailureLoginWidget(state.message);
+                    }else {
                       return _buildInitialLoginWidget();
                     }
                   },
